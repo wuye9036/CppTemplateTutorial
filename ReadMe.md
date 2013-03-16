@@ -118,31 +118,33 @@ floatArray.push_back(3.0f);
 vector unknownVector; // 错误示例
 ```
 
- 这样就是错误的。我们把通过类型绑定将模板类变成“普通的类”的过程，称之为模板实例化（Template Instantiate）。实例化的语法是：
+这样就是错误的。我们把通过类型绑定将模板类变成“普通的类”的过程，称之为模板实例化（Template Instantiate）。实例化的语法是：
  
- ```
- 模板名 < 模板实参1 [，模板实参2，...] >
+```
+模板名 < 模板实参1 [，模板实参2，...] >
+```
+
  
- // Examples
- vector<int>
- ClassA<double>
- 
- template <typename T0, typename T1> class ClassB
- {
+vector<int>
+ClassA<double>
+
+template <typename T0, typename T1> class ClassB
+{
 	// Class body ...
- };
+};
+
+ClassB<int, float>
+```
+
+当然，在实例化过程中，被绑定到模板参数上的类型（即模板实参）需要与模板形参正确匹配。
+就如同函数一样，如果没有提供足够并匹配的参数，模板便不能正确的实例化。
  
- ClassB<int, float>
- ```
- 
- 当然，在实例化过程中，被绑定到模板参数上的类型（即模板实参）需要与模板形参正确匹配。
- 就如同函数一样，如果没有提供足够并匹配的参数，模板便不能正确的实例化。
- 
-####1.1.2 模板类的成员函数定义
+####1.1.3 模板类的成员函数定义
 
 由于C++11正式废弃“模板导出”这一特性，因此在模板类的变量在调用成员函数的时候，需要看到完整的成员函数定义。因此现在的模板类中的成员函数，通常都是以内联的方式实现。
 例如：
 
+``` C++
 template <typename T>
 class vector
 {
@@ -155,13 +157,50 @@ public:
 private:
 	T* elements;
 };
+```
 
-void clear_it(vector<int> const&)
+当然，我们也可以将`vector<T>::clear`的定义部分放在类型之外，只不过这个时候的语法就显得蹩脚许多：
+
+```C++
+template <typename T>
+class vector
 {
-	
-}
+public:
+	void clear();			// 注意这里只有声明
+private:
+	T* elements;
+};
 
-但是有时候，我们也需要让一些函数在类之外出现
+template <typename T>
+void vector<T>::clear()		// 函数的实现放在这里
+{
+	// Function body
+}
+```
+
+函数的实现部分看起来略微拗口。我第一次学到的时候，觉得
+
+``` C++
+void vector::clear()
+{
+	// Function body
+}
+```
+
+这样不就行了吗？但是简单想就会知道，`clear`里面是找不到泛型类型`T`的符号的。
+
+因此，在成员函数实现的时候，必须要提供模板参数。此外，为什么类型名不是`vector`而是`vector<T>`呢？
+如果你了解过模板的偏特化与特化的语法，应该能看出，这里的vector<T>在语法上类似于特化/偏特化。实际上，这里的函数定义也确实是成员函数的偏特化。特化和偏特化的概念，本文会在第二部分详细介绍。
+
+最终，正确的成员函数实现如下所示：
+
+``` C++
+template <typename T>		// 模板参数
+void vector<T> /*看起来像偏特化*/ ::clear()		// 函数的实现放在这里
+{
+	// Function body
+}
+```
 
 ###1.2 Template Function的基本语法
 ###1.3 整型也可是Template参数

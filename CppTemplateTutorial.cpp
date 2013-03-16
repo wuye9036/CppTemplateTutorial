@@ -158,6 +158,30 @@ namespace _1_4
 	// ClassE<int, float>::?
 	// ClassE<int, int*>::?
 	// ClassE<int, int>::?
+
+	// Member function specialization
+	template <typename T>
+	class ClassF
+	{
+	public:
+		void foo();
+	};
+
+	template <typename T>
+	void ClassF<T>::foo()
+	{
+	}
+
+	template <> 
+	void ClassF<int>::foo()
+	{
+	}
+
+	void foo()
+	{
+		ClassF<int>().foo();
+		ClassF<float>().foo();
+	}
 }
 
 // 2.1 Function Specialization
