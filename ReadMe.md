@@ -41,15 +41,135 @@ C++之所以变成一门层次丰富、结构多变、语法繁冗的语言，�
 
 ## 1. Template的基本语法
 
-###1.1 Template Class的基本语法
+###1.1 Template Class基本语法
+
+####1.1.1 Template Class的与成员变量定义
+我们来回顾一下最基本的Template Class声明和定义形式：
+
+Template Class声明：
+```C++
+template <typename T> class ClassA;
+```
+
+Template Class定义：
+```C++
+template <typename T> class ClassA
+{
+	T member;
+};
+```
+
+`template` 是C++关键字，意味着我们接下来将定义一个模板。和函数一样，模板也有一系列参数。这些参数都被囊括在template之后的`< >`中。在上文的例子中， `typename T`便是模板参数。回顾一下与之相似的函数参数的声明形式：
+
+``` C++
+void foo(int a);
+```
+
+`T`则可以类比为函数形参`a`，这里的“模板形参”`T`，也同函数形参一样取成任何你想要的名字；`typename`则类似于例子中函数参数类型`int`，它表示模板参数中的`T`将匹配一个类型。
+
+在定义完模板参数之后，便可以定义你所需要的类。不过在定义类的时候，除了一般类可以使用的类型外，你还可以使用在模板参数中使用的类型 `T`。可以说，这个 `T`是模板的精髓，因为你可以通过指定模板实参，将T替换成你所需要的类型。
+
+例如我们用`ClassA<int>`来实例化模板类ClassA，那么`ClassA<int>`可以等同于以下的定义：
+
+``` C++
+// 注意：这并不是有效的C++语法，只是为了说明模板的作用
+typedef class {
+	int member;
+} ClassA<int>;
+```
+
+可以看出，通过模板参数替换类型，可以获得很多形式相同的新类型，有效减少了代码量。这种用法，我们称之为“泛型”（Generic Programming），它最常见的应用，即是STL中的容器模板类。
+
+####1.1.2 模板的使用
+
+对于C++来说，类型最重要的作用之一就是用它去产生一个变量。例如我们定义了一个动态数组（列表）的模板类`vector`，它对于任意的元素类型都具有push_back和clear的操作，我们便可以如下定义这个类：
+
+```C++
+template <typename T>
+class vector
+{
+public:
+	void push_back(T const&);
+	void clear();				
+	
+private:
+	T* elements;
+};
+```
+
+此时我们的程序需要一个整型和一个浮点型的列表，那么便可以通过以下代码获得两个变量：
+
+```C++
+vector<int> intArray;
+vector<float> floatArray;
+```
+
+此时我们就可以执行以下的操作，获得我们想要的结果：
+
+```C++
+intArray.push_back(5);
+floatArray.push_back(3.0f);
+```
+
+变量定义的过程可以分成两步来看：第一步，`vector<int>`将`int`绑定到模板类`vector`上，获得了一个“普通的类`vector<int>`”；第二步通过“vector<int>”定义了一个变量。
+与“普通的类”不同，模板类是不能直接用来定义变量的。例如
+
+```C++
+vector unknownVector; // 错误示例
+```
+
+ 这样就是错误的。我们把通过类型绑定将模板类变成“普通的类”的过程，称之为模板实例化（Template Instantiate）。实例化的语法是：
+ 
+ ```
+ 模板名 < 模板实参1 [，模板实参2，...] >
+ 
+ // Examples
+ vector<int>
+ ClassA<double>
+ 
+ template <typename T0, typename T1> class ClassB
+ {
+	// Class body ...
+ };
+ 
+ ClassB<int, float>
+ ```
+ 
+ 当然，在实例化过程中，被绑定到模板参数上的类型（即模板实参）需要与模板形参正确匹配。
+ 就如同函数一样，如果没有提供足够并匹配的参数，模板便不能正确的实例化。
+ 
+####1.1.2 模板类的成员函数定义
+
+由于C++11正式废弃“模板导出”这一特性，因此在模板类的变量在调用成员函数的时候，需要看到完整的成员函数定义。因此现在的模板类中的成员函数，通常都是以内联的方式实现。
+例如：
+
+template <typename T>
+class vector
+{
+public:
+	void clear()
+	{
+		// Function body
+	}
+	
+private:
+	T* elements;
+};
+
+void clear_it(vector<int> const&)
+{
+	
+}
+
+但是有时候，我们也需要让一些函数在类之外出现
+
 ###1.2 Template Function的基本语法
 ###1.3 整型也可是Template参数
 
 ## 2.  模板世界的If-Then-Else：特化与偏特化
-###2.1 实例化/特化类模板：从类模板到可以定义变量的具体类
-###2.2 类模板的匹配规则：特化与部分特化
-###2.3 函数模板的重载、特化与部分特化
-###2.4 技巧单元：模板与继承
+###2.1 类模板的匹配规则：特化与部分特化
+###2.2 函数模板的重载、特化与部分特化
+###2.3 技巧单元：模板与继承
 
 ## 3   拿起特化的武器，去写程序吧！
 ###3.1 利用模板特化规则实现If-Then-Else与Switch-Case
