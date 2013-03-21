@@ -124,7 +124,8 @@ vector unknownVector; // 错误示例
 模板名 < 模板实参1 [，模板实参2，...] >
 ```
 
- 
+看几个例子：
+```C++
 vector<int>
 ClassA<double>
 
