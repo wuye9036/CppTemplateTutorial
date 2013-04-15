@@ -238,4 +238,11 @@ alexandrescu 关于 min max 的讨论：《再谈Min和Max》
 ###6.1 变参模板
 ###6.2 Lambda与模板程序
 
-## 7   结语：讨论有益，争端无用
+## 7   模板的威力：从foreach, transform到Linq
+###7.1 Foreach与Transform
+###7.2 Reactor风格的编程
+###7.3 Reactor与Linq
+###7.4 Linq的C++实践
+###7.5 更高更快更强：从Linq到FP
+
+## 8   结语：讨论有益，争端无用
