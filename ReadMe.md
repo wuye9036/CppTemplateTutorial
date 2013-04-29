@@ -204,6 +204,28 @@ void vector<T> /*看起来像偏特化*/ ::clear()		// 函数的实现放在这�
 ```
 
 ###1.2 Template Function的基本语法
+
+####1.2.1 Template Function的声明和定义
+
+模板函数的语法与模板类基本相同，也是以关键字`template`和模板参数列表作为声明与定义的开始。模板参数列表中的类型，可以出现在参数、返回值以及函数体中。比方说下面几个例子
+
+```C++
+template <typename T> void foo(T const& v);
+
+template <typename T> T foo();
+
+template <typename T, typename U> U foo(T const&);
+
+template <typename T> void foo()
+{
+	T var;
+	// ...
+}
+```
+
+####1.2.2 模板函数的使用
+
+
 ###1.3 整型也可是Template参数
 
 ## 2.  模板世界的If-Then-Else：特化与偏特化
