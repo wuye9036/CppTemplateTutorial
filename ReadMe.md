@@ -334,7 +334,7 @@ error C2782: 'T _1_2_2::Add(T,T)' : template parameter 'T' is ambiguous
 
 不过，只要你别逼得编译器精神分裂的话，编译器其实是非常聪明的，它可以从很多的蛛丝马迹中，猜测到你真正的意图，有如下面的例子：
 
-```
+``` C++
 template <typename T> class A {};
 
 template <typename T> T foo( A<T> v );
@@ -372,14 +372,14 @@ int b = GetValue<int>(1);
 你要写一个模板函数叫 `c_style_cast`，顾名思义，执行的是C风格的转换。然后出于方便起见，你希望它能和 `static_cast` 这样的内置转换有同样的写法。
 于是你写了一个use case。
 
-```
+``` C++
 DstT dest = c_style_cast<DstT>(src);
 ```
 
 根据调用形式你知道了，有 `DstT` 和 `SrcT` 两个模板参数。参数只有一个， `src`，所以函数的形参当然是这么写了： `(SrcT src)`。实现也很简单， `(DstT)v`。
 我们把手上得到的信息来拼一拼，就可以编写自己的函数模板了：
 
-```
+``` C++
 template <typename SrcT, typename DstT> DstT c_style_cast(SrcT v)
 {
 	return (DstT)(v);
@@ -391,14 +391,14 @@ float i = c_style_cast<float>(v);
 
 嗯，很Easy嘛！我们F6一下…咦！这是什么意思！
 
-```
+``` C++
 error C2783: 'DstT _1_2_2::c_style_cast(SrcT)' : could not deduce template argument for 'DstT'
 ```
 
 然后你仔细的比较了一下，然后发现 … 模板参数有两个，而参数里面能得到的只有 `SrcT` 只有一个。结合出错信息看来关键在那个 `DstT` 上。
 这个时候，你死马当活马医，把模板参数写完整了：
 
-```
+``` C++
 float i = c_style_cast<float, int>(v);
 ```
 
@@ -407,7 +407,7 @@ float i = c_style_cast<float, int>(v);
 当然是可以的。只不过在部分推导、部分指定的情况下，编译器对模版参数的顺序是有限制的：先写需要指定的模板参数，再把能推导出来的模板参数放在后面。
 在这个例子中，能推导出来的是 `SrcT`，需要指定的是 `DstT`。于是你把函数模板写成：
 
-```
+``` C++
 template <typename DstT, typename SrcT> DstT c_style_cast(SrcT v)	// 模版参数 DstT 需要人肉指定，放前面。
 {
 	return (DstT)(v);
