@@ -39,6 +39,10 @@ C++之所以变成一门层次丰富、结构多变、语法繁冗的语言，�
 
 全文所有为我所撰写的部分，作者均保留所有版权。如果有需要转帖或引用，还请注明出处并告知于我。
 
+###0.4 补遗、写作计划
+
+1. 需要增加一节：模板的使用动机。
+
 ## 1. Template的基本语法
 
 ###1.1 Template Class基本语法
@@ -300,13 +304,13 @@ int result = Add<int>(a, b);
 int Add<int>(int a, int b) { return a + b; }
 ```
 
-这时在另外一个偏远的程序角落，你也需要求和。而此时你的参数类型是 `float` ，写做：
+这时在另外一个偏远的程序角落，你也需要求和。而此时你的参数类型是 `float` ，于是你写下：
 
 ``` C++
 Add<float>(a, b);
 ```
 
-一切看起来都很完美。但是如果你具备程序员的最优美德 ———— 懒惰 ———— 的话，你肯定会这样想，我在调用 `Add<int>(a, b)` 的时候， `a` 和 `b` 匹配的都是那个 `T`。编译器就应该知道那个 `T` 实际上是 `int` 呀？为什么还要我多此一举写 `Add<int>` 呢？
+一切看起来都很完美。但如果你具备程序员的最佳美德——懒惰——的话，你肯定会这样想，我在调用 `Add<int>(a, b)` 的时候， `a` 和 `b` 匹配的都是那个 `T`。编译器就应该知道那个 `T` 实际上是 `int` 呀？为什么还要我多此一举写 `Add<int>` 呢？
 唔，我想说的是，编译器的作者也是这么想的。所以实际上你在编译器里面写下以下片段：
 
 ``` C++
@@ -315,7 +319,7 @@ int b = 3;
 int result = Add(a, b);
 ```
 
-编译器会心领神会的将 `Add` 变成 `Add<int>`。但是编译器并不会精神分裂。如果你这么写的话呢？
+编译器会心领神会的将 `Add` 变成 `Add<int>`。但是编译器不能面对模棱两可的答案。比如你这么写的话呢？
 
 ``` C++
 int  a = 5;
@@ -330,7 +334,7 @@ int  result = Add(a, b);
 error C2782: 'T _1_2_2::Add(T,T)' : template parameter 'T' is ambiguous
 ```
 
-这个提示再明确不过了。
+好吧，"ambigous"，这个提示再明确不过了。
 
 不过，只要你别逼得编译器精神分裂的话，编译器其实是非常聪明的，它可以从很多的蛛丝马迹中，猜测到你真正的意图，有如下面的例子：
 
@@ -340,7 +344,7 @@ template <typename T> class A {};
 template <typename T> T foo( A<T> v );
 
 A<int> v;
-foo(v);				// 它能准确的猜到 T 是 int.
+foo(v);	// 它能准确的猜到 T 是 int.
 ```
 
 咦，编译器居然绕过了A这个外套，猜到了 `T` 匹配的是 `int`。编译器是怎么完成这一“魔法”的，我们暂且不表，2.2节时再和盘托出。
@@ -355,8 +359,8 @@ template <typename T> T GetValue(int i)
 	return static_cast<T>(data[i]);
 }
 
-float a = GetValue(0);
-int b = GetValue(1);
+float a = GetValue(0);	// 出错了！
+int b = GetValue(1);	// 也出错了！
 ```
 
 为什么会出错呢？你仔细想了想，原来编译器是没办法去根据返回值推断类型的。函数调用的时候，返回值被谁接受还不知道呢。
@@ -395,7 +399,7 @@ float i = c_style_cast<float>(v);
 error C2783: 'DstT _1_2_2::c_style_cast(SrcT)' : could not deduce template argument for 'DstT'
 ```
 
-然后你仔细的比较了一下，然后发现 … 模板参数有两个，而参数里面能得到的只有 `SrcT` 只有一个。结合出错信息看来关键在那个 `DstT` 上。
+然后你仔细的比较了一下，然后发现 … 模板参数有两个，而参数里面能得到的只有 `SrcT` 一个。结合出错信息看来关键在那个 `DstT` 上。
 这个时候，你死马当活马医，把模板参数写完整了：
 
 ``` C++
@@ -414,7 +418,7 @@ template <typename DstT, typename SrcT> DstT c_style_cast(SrcT v)	// 模版参�
 }
 
 int v = 0;
-float i = c_style_cast<float>(v);									// 形象地说，DstT会先把你指定的参数吃掉，剩下的就交给编译器从函数参数列表中推导啦。
+float i = c_style_cast<float>(v);  // 形象地说，DstT会先把你指定的参数吃掉，剩下的就交给编译器从函数参数列表中推导啦。
 ```
 
 
