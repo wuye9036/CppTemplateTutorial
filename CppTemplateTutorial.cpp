@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <vector>
 
-#define WRONG_CODE_ENABLED 0
+#define WRONG_CODE_ENABLED 1
 
 // 0. Basic Form
 namespace _0
@@ -56,6 +56,37 @@ namespace _1_2
 	_1_1::ClassA<WhatTheFuck>		b;	// Wrong
 	_1_1::ClassA					c;	// Wrong
 	#endif
+}
+
+// 1.2.2
+
+namespace _1_2_2
+{
+	template <typename T> T Add(T a, T b)
+	{
+		return a + b;
+	}
+
+	template <typename SrcT, typename DstT> DstT c_style_cast(SrcT v)
+	{
+		return (DstT)(v);
+	}
+
+#if WRONG_CODE_ENABLED
+	void foo()
+	{
+		int  a = 0;
+		int  b = 0;
+		char c = 0;
+		Add(b, c);
+	}
+
+	void foo2()
+	{
+		int v = 0;
+		float i = c_style_cast<float>(v);
+	}
+#endif
 }
 
 // 1.3 Instanciating 2

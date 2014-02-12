@@ -271,11 +271,158 @@ template <typename T> void foo()
 
 ####1.2.2 模板函数的使用
 
+我们先来看一个简单的函数模板，两个数相加：
+
+``` C++
+template <typename T> T Add(T a, T b)
+{
+	return a + b;
+}
+```
+
+函数模板的调用格式是：
+
+``` C++
+函数模板名 < 模板参数列表 > ( 参数 )
+```
+
+例如，我们想对两个 `int` 求和，那么套用类的模板实例化方法，我们可以这么写：
+
+``` C++
+int a = 5;
+int b = 3;
+int result = Add<int>(a, b);
+```
+
+这时我们等于拥有了一个新函数：
+
+``` C++
+int Add<int>(int a, int b) { return a + b; }
+```
+
+这时在另外一个偏远的程序角落，你也需要求和。而此时你的参数类型是 `float` ，写做：
+
+``` C++
+Add<float>(a, b);
+```
+
+一切看起来都很完美。但是如果你具备程序员的最优美德 ———— 懒惰 ———— 的话，你肯定会这样想，我在调用 `Add<int>(a, b)` 的时候， `a` 和 `b` 匹配的都是那个 `T`。编译器就应该知道那个 `T` 实际上是 `int` 呀？为什么还要我多此一举写 `Add<int>` 呢？
+唔，我想说的是，编译器的作者也是这么想的。所以实际上你在编译器里面写下以下片段：
+
+``` C++
+int a = 5;
+int b = 3;
+int result = Add(a, b);
+```
+
+编译器会心领神会的将 `Add` 变成 `Add<int>`。但是编译器并不会精神分裂。如果你这么写的话呢？
+
+``` C++
+int  a = 5;
+char b = 3;
+int  result = Add(a, b);
+```
+
+第一个参数 `a` 告诉编译器，这个 `T` 是 `int`。编译器点点头说，好。但是第二个参数 `b` 不高兴了，告诉编译器说，你这个 `T`，其实是 `char`。
+两个参数各自指导 `T` 的类型，编译器就不知道怎么做了。在Visual Studio 2012下，会有这样的提示：
+
+```
+error C2782: 'T _1_2_2::Add(T,T)' : template parameter 'T' is ambiguous
+```
+
+这个提示再明确不过了。
+
+不过，只要你别逼得编译器精神分裂的话，编译器其实是非常聪明的，它可以从很多的蛛丝马迹中，猜测到你真正的意图，有如下面的例子：
+
+```
+template <typename T> class A {};
+
+template <typename T> T foo( A<T> v );
+
+A<int> v;
+foo(v);				// 它能准确的猜到 T 是 int.
+```
+
+咦，编译器居然绕过了A这个外套，猜到了 `T` 匹配的是 `int`。编译器是怎么完成这一“魔法”的，我们暂且不表，2.2节时再和盘托出。
+
+下面轮到你的练习时间了。你试着写了很多的例子，但是其中一个你还是犯了疑惑：
+
+``` C++
+float data[1024];
+
+template <typename T> T GetValue(int i)
+{
+	return static_cast<T>(data[i]);
+}
+
+float a = GetValue(0);
+int b = GetValue(1);
+```
+
+为什么会出错呢？你仔细想了想，原来编译器是没办法去根据返回值推断类型的。函数调用的时候，返回值被谁接受还不知道呢。
+如下修改后，就一切正常了：
+
+``` C++
+float a = GetValue<float>(0);
+int b = GetValue<int>(1);
+```
+
+嗯，是不是so easy啊？嗯，你又信心满满的做了一个练习：
+
+你要写一个模板函数叫 `c_style_cast`，顾名思义，执行的是C风格的转换。然后出于方便起见，你希望它能和 `static_cast` 这样的内置转换有同样的写法。
+于是你写了一个use case。
+
+```
+DstT dest = c_style_cast<DstT>(src);
+```
+
+根据调用形式你知道了，有 `DstT` 和 `SrcT` 两个模板参数。参数只有一个， `src`，所以函数的形参当然是这么写了： `(SrcT src)`。实现也很简单， `(DstT)v`。
+我们把手上得到的信息来拼一拼，就可以编写自己的函数模板了：
+
+```
+template <typename SrcT, typename DstT> DstT c_style_cast(SrcT v)
+{
+	return (DstT)(v);
+}
+
+int v = 0;
+float i = c_style_cast<float>(v);
+```
+
+嗯，很Easy嘛！我们F6一下…咦！这是什么意思！
+
+```
+error C2783: 'DstT _1_2_2::c_style_cast(SrcT)' : could not deduce template argument for 'DstT'
+```
+
+然后你仔细的比较了一下，然后发现 … 模板参数有两个，而参数里面能得到的只有 `SrcT` 只有一个。结合出错信息看来关键在那个 `DstT` 上。
+这个时候，你死马当活马医，把模板参数写完整了：
+
+```
+float i = c_style_cast<float, int>(v);
+```
+
+嗯，很顺利的通过了。难道C++不能支持让参数推导一部分模板参数吗？
+
+当然是可以的。只不过在部分推导、部分指定的情况下，编译器对模版参数的顺序是有限制的：先写需要指定的模板参数，再把能推导出来的模板参数放在后面。
+在这个例子中，能推导出来的是 `SrcT`，需要指定的是 `DstT`。于是你把函数模板写成：
+
+```
+template <typename DstT, typename SrcT> DstT c_style_cast(SrcT v)	// 模版参数 DstT 需要人肉指定，放前面。
+{
+	return (DstT)(v);
+}
+
+int v = 0;
+float i = c_style_cast<float>(v);									// 形象地说，DstT会先把你指定的参数吃掉，剩下的就交给编译器从函数参数列表中推导啦。
+```
+
+
 ###1.3 整型也可是Template参数
 
 ## 2.  模板世界的If-Then-Else：特化与偏特化
 ###2.1 类模板的匹配规则：特化与部分特化
-###2.2 函数模板的重载、特化与部分特化
+###2.2 函数模板的重载、参数匹配、特化与部分特化
 ###2.3 技巧单元：模板与继承
 
 ## 3   拿起特化的武器，去写程序吧！
