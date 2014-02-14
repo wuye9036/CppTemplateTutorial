@@ -103,7 +103,11 @@ namespace _1_3
 	template <uint8_t a, typename b, void* c> class B {};
 	template <void (*a)()> class C {};
 	template <void (A<3>::*a)()> class D {};
+
+#if WRONG_CODE_ENABLED
 	template <float a> class E {};
+#endif
+
 	void foo()
 	{
 		A<5> a;
@@ -116,7 +120,17 @@ namespace _1_3
 #endif
 	}
 
+#if WRONG_CODE_ENABLED
+	const char* s = "abc";
+	template <char const* s> class S
+	{
+	};
 
+	void foo2()
+	{
+		S<"abc"> i;
+	}
+#endif
 
 	template <typename T>
 	class ClassB
