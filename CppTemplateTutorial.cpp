@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include <vector>
+#include <cstdint>
 
-#define WRONG_CODE_ENABLED 1
+#define WRONG_CODE_ENABLED 0
 
 // 0. Basic Form
 namespace _0
@@ -92,6 +93,45 @@ namespace _1_2_2
 // 1.3 Instanciating 2
 namespace _1_3
 {
+	template <int i> class A 
+	{
+	public:
+		void foo()
+		{
+		}
+	};
+	template <uint8_t a, typename b, void* c> class B {};
+	template <void (*a)()> class C {};
+	template <void (A<3>::*a)()> class D {};
+
+#if WRONG_CODE_ENABLED
+	template <float a> class E {};
+#endif
+
+	void foo()
+	{
+		A<5> a;
+		B<7, A<5>, nullptr> b;
+		C<&foo> c;
+		D<&A<3>::foo> d;
+#if WRONG_CODE_ENABLED
+		int x = 3;
+		A<x> b;
+#endif
+	}
+
+#if WRONG_CODE_ENABLED
+	const char* s = "abc";
+	template <char const* s> class S
+	{
+	};
+
+	void foo2()
+	{
+		S<"abc"> i;
+	}
+#endif
+
 	template <typename T>
 	class ClassB
 	{
