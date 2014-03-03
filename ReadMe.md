@@ -636,7 +636,7 @@ for(v4a, v4b : vectorsA, vectorsB)
 }
 ```
 
-这里的问题就在于，如何根据 `type` 分别提供我们需要的实现？这里有两个难点。首先，if type == xxx 是不存在于C++中的。第二，即便存在根据 `type` 的分配方法，我们也不希望它在运行时branch，这样会变得很慢。我们希望它能按照类型直接就把代码编译好，就跟直接写的一样。
+这里的问题就在于，如何根据 `type` 分别提供我们需要的实现？这里有两个难点。首先， `if(type == xxx) {}` 是不存在于C++中的。第二，即便存在根据 `type` 的分配方法，我们也不希望它在运行时branch，这样会变得很慢。我们希望它能按照类型直接就把代码编译好，就跟直接写的一样。
 
 嗯，聪明你果然想到了，重载也可以解决这个问题。
 
@@ -661,6 +661,76 @@ for(v4a, v4b : vectorsA, vectorsB)
 好吧，我承认这个例子还是太牵强了。不过相信我，在你阅读完第二章和第三章之后，你会将这些特性自如地运用到你的程序之中。你的程序将会变成体现模板“可运算”威力的最好例子。
 
 ###2.2 模板世界的If-Then-Else：类模板的特化与偏特化
+
+####2.2.1 根据类型执行代码
+前一节给出了一个例子，从例子中可以看出，有时候我们需要做出根据类型执行不同代码的事情。要达成这一目的，模板并不是唯一的途径。比如之前我们所说的重载。如果把眼界放宽一些，虚函数也是根据类型执行代码的例子。此外，在C语言时代，也会有一些技法来达到这个目的，比如下面这个例子，我们需要对两个浮点做加法， 或者对两个整数做乘法：
+
+``` C
+struct Variant
+{
+	union
+	{
+		int x;
+		float y;
+	} data;
+	uint32 typeId;
+};
+
+Variant addFloatOrMulInt(Variant const* a, Variant const* b)
+{
+	Variant ret;
+	assert(a->typeId == b->typeId);
+	if (a->typeId == TYPE_INT)
+	{
+		ret.x = a->x * b->x;
+	}
+	else
+	{
+		ret.y = a->y + b->y;
+	}
+	return ret;
+}
+
+```
+
+更常见的是 `void*`:
+
+``` C++
+#define BIN_OP(type, a, op, b, result) (*(type const *)(result)) = (*(type const *)(a)) op (*(type const*)(b))
+void doDiv(void* out, void const* data0, void const* data1, DATA_TYPE type)
+{
+	if(type == TYPE_INT)
+	{
+		BIN_OP(int, data0, *, data1, out);
+	}
+	else
+	{
+		BIN_OP(float, data0, +, data1, out);
+	}
+}
+```
+
+在C++中比如在 `Boost.Any` 的实现中，运用了 `typeid` 来查询类型信息。和 `typeid` 同属于RTTI机制的 `dynamic_cast`，也经常会用来做类型判别的工作。我想你应该写过类似于下面的代码
+
+``` C++
+IAnimal* animal = GetAnimalFromSystem();
+
+IDog* maybeDog = dynamic_cast<IDog*>(animal);
+if(maybeDog)
+{
+	maybeDog->Wangwang();
+}
+ICat* maybeCat = dynamic_cast<ICat*>(animal);
+if(maybeCat)
+{
+	maybeCat->Moemoe();
+}
+```
+
+当然，在实际的工作中，我们建议把需要 `dynamic_cast` 后执行的代码，尽量变成虚函数。不过这个已经是另外一个问题了。我们看到，不管是哪种方法都很难避免 `if` 的存在。而且因为输入数据的类型是模糊的，经常需要强制地、没有任何检查的转换成某个类型，因此很容易出错。
+
+模板与这些方法有区别吗？
+
 ###2.3 函数模板的重载、参数匹配、特化与部分特化
 ###2.4 技巧单元：模板与继承
 
