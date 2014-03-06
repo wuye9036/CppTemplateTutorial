@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include <vector>
 #include <cstdint>
 
@@ -149,6 +149,45 @@ namespace _1_3
 #if WRONG_CODE_ENABLED
 	ClassC<StructA> e;	// Wrong
 #endif
+}
+
+namespace _2_2_2
+{
+	template <typename T> class AddFloatOrMulInt
+	{
+		static T Do(T a, T b)
+		{
+			// 在这个例子里面一般形式里面是什么内容不重要，因为用不上
+			// 这里就随便给个0吧。
+			return T(0);
+		}
+	};
+
+	// 其次，我们要指定T是int时候的代码，这就是特化：
+	template <> class AddFloatOrMulInt<int>
+	{
+	public:
+		static int Do(int a, int b)
+		{
+			return a * b;
+		}
+	};
+
+	// 再次，我们要指定T是float时候的代码：
+	template <> class AddFloatOrMulInt<float>
+	{
+	public:
+		static float Do(float a, float b)
+		{
+			return a * b;
+		}
+	};
+
+	void foo()
+	{
+		float a(0), b(1);
+		float c = AddFloatOrMulInt<float>::Do(a, b);
+	}
 }
 
 // 1.4 Specialization, Partial Specialization, Full Specialization

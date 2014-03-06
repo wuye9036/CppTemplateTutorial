@@ -769,8 +769,222 @@ Variant result = addFloatOrMulInt(aVar, bVar);
 
 在模板代码中，这个“合适的机制”就是指“特化”和“部分特化（Partial Specialization）”，后者也叫“偏特化”。
 
-####2.2.2模板原型与偏特化
+####2.2.2特化
 
+我的高中物理老师对我说过一句令我受用至今的话：把自己能做的事情做好。编写模板程序也是一样。当你试图用模板解决问题之前，先撇开那些复杂的语法要素，用最直观的方式表达你的需求：
+
+``` C++
+// 这里是伪代码，意思一下
+
+int|float addFloatOrMulInt(a, b)
+{
+	if(type is Int)
+	{
+		return a * b;
+	}
+	else if (type is Float)
+	{
+		return a + b;
+	}
+}
+
+void foo()
+{
+	float a, b, c;
+	c = addFloatOrMulInt(a, b);		// c = a + b;
+	
+	int x, y, z;
+	z = addFloatOrMulInt(x, y);		// z = x * y;
+}
+```
+
+因为这一节是讲类模板有关的特化和偏特化机制，所以我们不用普通的函数，而是用类的静态成员函数来做这个事情（这就是典型的没事找抽型）：
+
+``` C++
+// 这里仍然是伪代码，意思一下，too。
+class AddFloatOrMulInt
+{
+	static int|float Do(a, b)
+	{
+		if(type is Int)
+		{
+			return a * b;
+		}
+		else if (type is Float)
+		{
+			return a + b;
+		}
+	}
+};
+
+void foo()
+{
+	float a, b, c;
+	c = AddFloatOrMulInt::Do(a, b);		// c = a + b;
+	
+	int x, y, z;
+	z = AddFloatOrMulInt::Do(x, y);		// z = x * y;
+}
+```
+
+好，意思表达清楚了。我们先从调用方的角度，把这个形式改写一下：
+
+``` C++
+void foo()
+{
+	float a, b, c;
+	c = AddFloatOrMulInt<float>::Do(a, b);		// c = a + b;
+	
+	int x, y, z;
+	z = AddFloatOrMulInt<int>::Do(x, y);		// z = x * y;
+}
+```
+也许你不明白为什么要改写成现在这个样子。看不懂不怪你，怪我讲的不好。但是你别急，先看看这样改写以后能不能跟我们的目标接近一点。如果我们把 `AddFloatOrMulInt<float>::Do` 看作一个普通的函数，那么我们可以写两个实现出来：
+
+``` C++
+float AddFloatOrMulInt<float>::Do(float a, float b)
+{
+	return a + b;
+}
+
+int AddFloatOrMulInt<int>::Do(int a, int b)
+{
+	return a * b;
+}
+
+void foo()
+{
+	float a, b, c;
+	c = AddFloatOrMulInt<float>::Do(a, b);		// c = a + b;
+	
+	int x, y, z;
+	z = AddFloatOrMulInt<int>::Do(x, y);		// z = x * y;
+}
+```
+
+这样是不是就很开心了？我们更进一步，把 `AddFloatOrMulInt<int>::Do` 换成合法的类模板：
+
+``` C++
+// 这个是给float用的。
+template <typename T> class AddFloatOrMulInt
+{
+	T Do(T a, T b)
+	{
+		return a + b;
+	}
+};
+
+// 这个是给int用的。
+template <typename T> class AddFloatOrMulInt
+{
+	T Do(T a, T b)
+	{
+		return a * b;
+	}
+};
+
+void foo()
+{
+	float a, b, c;
+
+	// 嗯，我们需要 c = a + b;
+	c = AddFloatOrMulInt<float>::Do(a, b);		
+	// ... 觉得哪里不对劲 ...
+	// ...
+	// ...
+	// ...
+	// 啊！有两个AddFloatOrMulInt，class看起来一模一样，要怎么区分呢！
+}
+```
+好吧，问题来了！如何要让两个内容不同，但是模板参数形式相同的类进行区分呢？特化！特化（specialization）是根据一个或多个特殊的整数或类型，给出模板实例化时的一个指定内容。我们先来看特化是怎么应用到这个问题上的。
+``` C++
+// 首先，要写出模板的一般形式（原型）
+template <typename T> class AddFloatOrMulInt
+{
+	static T Do(T a, T b)
+	{
+		// 在这个例子里面一般形式里面是什么内容不重要，因为用不上
+		// 这里就随便给个0吧。
+		return T(0);
+	}
+};
+
+// 其次，我们要指定T是int时候的代码，这就是特化：
+template <> class AddFloatOrMulInt<int>
+{
+public:
+	static int Do(int a, int b) // 
+	{
+		return a * b;
+	}
+};
+
+// 再次，我们要指定T是float时候的代码：
+template <> class AddFloatOrMulInt<float>
+{
+public:
+	static float Do(float a, float b)
+	{
+		return a + b;
+	}
+};
+
+void foo()
+{
+	// 这里面就不写了
+}
+```
+我们再把特化的形式拿出来一瞧：这货有点怪啊： `template <> class AddFloatOrMulInt<int>`。别急，我给你解释一下。
+
+``` C++
+// 我们这个模板的基本形式是什么？
+template <typename T> class AddFloatOrMulInt;
+
+// 但是这个类，是给T是Int的时候用的，于是我们写作
+class AddFloatOrMulInt<int>
+// 当然，这里编译是通不过的。
+
+// 但是它又不是个普通类，而是类模板的一个特化（特例）。
+// 所以前面要加模板关键字template，
+// 以及模板参数列表
+template </* 这里要填什么？ */> class AddFloatOrMulInt<int>;
+
+// 最后，模板参数列表里面填什么？因为原型的T已经被int取代了。所以这里就不能放任何额外的参数了。
+// 所以这里要放空。
+template <> class AddFloatOrMulInt<int>
+{
+	// ... 针对Int的实现 ... 
+}
+
+// Bingo!
+```
+
+哈，这样就好了。我们来做一个练习。我们有一些类型，然后你要用模板做一个对照表，让类型对应上一个数字。我先来做一个示范：
+
+``` C++
+
+template <typename T> TypeToID
+{
+	static int const ID = -1;
+};
+
+template <> TypeToID<uint8_t>
+{
+	static int const ID = 0;
+};
+```
+
+然后呢，你的任务就是，要所有无符号的整数类型的特化（其实就是`uint8_t`到`uint64_t`啦），把所有的基本类型都赋予一个ID（当然是不一样的啦）。当你做完后呢，可以把类型所对应的ID打印出来，我仍然以 `uint8_t` 为例：
+
+``` C++
+void PrintID()
+{
+	cout << "ID of uint8_t: " << TypeToID<uint8_t>::ID << endl;
+}
+```
+嗯，看起来挺简单的，是吧。但是这里透露出了一个非常重要的信号，我希望你已经能察觉出来了： `TypeToID` 如同是一个函数。这个函数只能在编译期间执行。它输入一个类型，输出一个ID。
+
+如果你体味到了这一点，那么恭喜你，你的模板元编程已经开悟了。
 
 ###2.3 函数模板的重载、参数匹配、特化与部分特化
 ###2.4 技巧单元：模板与继承
