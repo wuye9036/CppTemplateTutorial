@@ -992,7 +992,7 @@ void PrintID()
 
 在上一节结束之后，你一定做了许多的练习。我们再来做三个练习。第一，给`float`一个ID；第二，给`void*`一个ID；第三，给任意类型的指针一个ID。先来做第一个:
 
-```
+``` C++
 // ...
 // TypeToID 的模板“原型”
 // ...
@@ -1005,7 +1005,7 @@ template <typename T> class TypeToID<float>
 
 嗯， 这个你已经了然于心了。那么`void*`呢？你想了想，这已经是一个复合类型了。不错你还是战战兢兢的写了下来：
 
-```
+``` C++
 template <> class TypeToID<void*>
 {
 	static int const ID = 0x401d;
@@ -1019,7 +1019,7 @@ void PrintID()
 
 遍译运行一下，对了。模板不过如此嘛。然后你觉得自己已经完全掌握了，并试图将所有C++类型都放到模板里面，开始了自我折磨的过程：
 
-```
+``` C++
 class ClassB {};
 
 template <> class TypeToID<void ()>;			// 函数的TypeID
@@ -1031,7 +1031,7 @@ template <> class TypeToID<
 
 甚至连 `const` 和 `volatile` 都能装进去
 
-```
+``` C++
 template <> class TypeToID<int const * volatile * const volatile>;
 ```
 
