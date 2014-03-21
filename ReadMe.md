@@ -1037,9 +1037,39 @@ template <> class TypeToID<int const * volatile * const volatile>;
 
 此时就很明白了，只要 `<>` 内填进去的是一个C++能解析的合法类型，模板都能让你特化。不过这个时候如果你一点都没有写错的话， `PrintID` 中只打印了我们提供了特化的类型的ID。那如果我们没有为之提供特化的类型呢？比如说double？OK，实践出真知，我们来尝试着运行一下：
 
+``` C++
+void PrintID()
+{
+	cout << "ID of double: " << TypeToID<double>::ID << endl;
+}
 ```
 
+嗯，它输出的是-1。我们顺藤摸瓜会看到， `TypeToID`的类模板“原型”的ID是值就是-1。通过这个例子可以知道，当模板实例化时提供的模板参数不能匹配到任何的特化形式的时候，它就会去匹配类模板的“原型”形式。
+
+不过这里有一个问题要厘清一下。和继承不同，类模板的“原型”和它的特化类在实现上是没有关系的，并不是在类模板中写了 `ID` 这个Member，那所有的特化就必须要加入 `ID` 这个Member，或者特化就自动有了这个成员。完全没这回事。我们把类模板改成以下形式，或许能看的更清楚一点：
+
+``` C++
+template <typename T> class TypeToID
+{
+public:
+	static int const NotID = -2;
+};
+
+template <> class TypeToID<float>
+{
+public:
+	static int const ID = 1;
+};
+
+void PrintID()
+{
+	cout << "ID of float: " << TypeToID<float>::ID << endl;	// Print "1"
+	cout << "NotID of float: " << TypeToID<float>::NotID << endl;	// Error! TypeToID<float>使用的特化的类，这个类的实现没有NotID这个成员。
+	cout << "ID of double: " << TypeToID<double>::ID << endl;	// Error! TypeToID<double>是由模板类实例化出来的，它只有NotID，没有ID这个成员。
+}
 ```
+
+这样就明白了。类模板和类模板的特化的作用，仅仅是指导编译器选择哪个编译，但是特化之间、特化和它原型的类模板之间，是分别独立实现的。所以如果多个特化、或者特化和对应的类模板有着类似的内容，很不好意思，你得写上若干遍了。
 
 前面的例子里面，我们使用了单参数的模板。不过既然模板有多个参数的形式，那特化也得支持多个参数。
 
