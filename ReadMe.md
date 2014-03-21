@@ -769,7 +769,7 @@ Variant result = addFloatOrMulInt(aVar, bVar);
 
 在模板代码中，这个“合适的机制”就是指“特化”和“部分特化（Partial Specialization）”，后者也叫“偏特化”。
 
-####2.2.2特化
+####2.2.2 特化
 
 我的高中物理老师对我说过一句令我受用至今的话：把自己能做的事情做好。编写模板程序也是一样。当你试图用模板解决问题之前，先撇开那些复杂的语法要素，用最直观的方式表达你的需求：
 
@@ -963,13 +963,15 @@ template <> class AddFloatOrMulInt<int>
 
 ``` C++
 
-template <typename T> TypeToID
+template <typename T> class TypeToID
 {
+public:
 	static int const ID = -1;
 };
 
-template <> TypeToID<uint8_t>
+template <> class TypeToID<uint8_t>
 {
+public:
 	static int const ID = 0;
 };
 ```
@@ -985,6 +987,61 @@ void PrintID()
 嗯，看起来挺简单的，是吧。但是这里透露出了一个非常重要的信号，我希望你已经能察觉出来了： `TypeToID` 如同是一个函数。这个函数只能在编译期间执行。它输入一个类型，输出一个ID。
 
 如果你体味到了这一点，那么恭喜你，你的模板元编程已经开悟了。
+
+####2.2.3 偏特化
+
+在上一节结束之后，你一定做了许多的练习。我们再来做三个练习。第一，给`float`一个ID；第二，给`void*`一个ID；第三，给任意类型的指针一个ID。先来做第一个:
+
+```
+// ...
+// TypeToID 的模板“原型”
+// ...
+
+template <typename T> class TypeToID<float>
+{
+	static int const ID = 0xF10A7;
+};
+```
+
+嗯， 这个你已经了然于心了。那么`void*`呢？你想了想，这已经是一个复合类型了。不错你还是战战兢兢的写了下来：
+
+```
+template <> class TypeToID<void*>
+{
+	static int const ID = 0x401d;
+};
+
+void PrintID()
+{
+	cout << "ID of uint8_t: " << TypeToID<void*>::ID << endl;
+}
+```
+
+遍译运行一下，对了。模板不过如此嘛。然后你觉得自己已经完全掌握了，并试图将所有C++类型都放到模板里面，开始了自我折磨的过程：
+
+```
+class ClassB {};
+
+template <> class TypeToID<void ()>;			// 函数的TypeID
+template <> class TypeToID<int[3]>;				// 数组的TypeID
+template <> class TypeToID<int (int[3])>;		// 这是以数组为参数的函数的TypeID
+template <> class TypeToID<
+	int (ClassB::*[3])(void*, float[2])>;		// 我也不知道这是什么了，自己看着办吧。
+```
+
+甚至连 `const` 和 `volatile` 都能装进去
+
+```
+template <> class TypeToID<int const * volatile * const volatile>;
+```
+
+此时就很明白了，只要 `<>` 内填进去的是一个C++能解析的合法类型，模板都能让你特化。不过这个时候如果你一点都没有写错的话， `PrintID` 中只打印了我们提供了特化的类型的ID。那如果我们没有为之提供特化的类型呢？比如说double？OK，实践出真知，我们来尝试着运行一下：
+
+```
+
+```
+
+前面的例子里面，我们使用了单参数的模板。不过既然模板有多个参数的形式，那特化也得支持多个参数。
 
 ###2.3 函数模板的重载、参数匹配、特化与部分特化
 ###2.4 技巧单元：模板与继承
