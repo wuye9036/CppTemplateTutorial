@@ -1071,7 +1071,169 @@ void PrintID()
 
 这样就明白了。类模板和类模板的特化的作用，仅仅是指导编译器选择哪个编译，但是特化之间、特化和它原型的类模板之间，是分别独立实现的。所以如果多个特化、或者特化和对应的类模板有着类似的内容，很不好意思，你得写上若干遍了。
 
-前面的例子里面，我们使用了单参数的模板。不过既然模板有多个参数的形式，那特化也得支持多个参数。
+第三个问题，是写一个模板匹配任意类型的指针。对于C语言来说，因为没有泛型的概念，因此它提供了无类型的指针`void*`。它的优点是，所有指针都能转换成它。它的缺点是，一旦转换称它后，你就再也不知道这个指针到底是指向`float`或者是`int`或者是`struct`了。
+
+比如说`copy`。
+
+``` C
+void copy(void* dst, void const* src, size_t elemSize, size_t elemCount, void (*copyElem)(void* dstElem, void const* srcElem))
+{
+	void const* reader = src;
+	void const* writer = dst;
+	for(size_t i = 0; i < elemCount; ++i)
+	{
+		copyElem(writer, reader);
+		advancePointer(reader, elemSize);	// 把Reader指针往后移动一些字节
+		advancePointer(writer, elemSize);
+	}
+}
+```
+
+为什么要提供copyElem，是因为可能有些struct需要深拷贝，所以得用特殊的copy函数。这个在C++98/03里面就体现为拷贝构造和赋值函数。
+但是不管怎么搞，因为这个函数的参数只是`void*`而已，当你使用了错误的elemSize，或者传入了错误的copyElem，就必须要到运行的时候才有可能看出来。注意，这还只是有可能而已。
+
+
+那么C++有了模板后，能否既能匹配任意类型的指针，同时又保留了类型信息呢？答案是显然的。至于怎么写，那就得充分发挥你的直觉了：
+
+首先，我们需要一个`typename T`来指代“任意类型”这四个字：
+
+``` C++
+template <typename T>
+```
+
+接下来，我们要写函数原型:
+
+``` C++
+void copy(?? dest, ?? src, size_t elemCount);
+```
+
+这里的 `？？` 要怎么写呢？既然我们有了模板类型参数T，那我们不如就按照经验，写 `T*` 看看。
+
+``` C++
+template <typename T>
+void copy(T* dst, T const* src, size_t elemCount);
+```
+
+编译一下，咦，居然通过了。看来这里的语法与我们以前学到的知识并没有什么不同。这也是语言设计最重要的一点原则：一致性。它可以让你辛辛苦苦体验到的规律不至于白费。
+最后就是实现：
+
+``` C++
+template <typename T>
+void copy(T* dst, T const* src, size_t elemCount)
+{
+	for(size_t i = 0; i < elemCount; ++i)
+	{
+		dst[i] = src[i];
+	}
+}
+```
+
+是不是简洁了许多？你不需要再传入size；只要你有正确的赋值函数，也不需要提供定制的copy；也不用担心dst和src的类型不匹配了。
+
+最后，我们把函数模板学到的东西，也应用到类模板里面：
+
+``` C++
+template <typename T>					// 嗯，需要一个T
+class TypeToID<T*>						// 我要对所有的指针类型特化，所以这里就写T*
+{
+public:
+	static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+};
+```
+
+最后写个例子来测试一下，看看我们的 `T*` 能不能搞定 `float*`
+
+``` C++
+void PrintID()
+{
+	cout << "ID of float*: " << TypeToID<float*>::ID << endl;
+}
+```
+
+哈哈，大功告成。嗯，别急着高兴。待我问一个问题：你知道 `TypeToID<float*>` 后，这里的T是什么吗？换句话说，你知道下面这段代码打印的是什么吗？
+
+``` C++
+// ...
+// TypeToID 的其他代码，略过不表
+// ...
+
+template <typename T>					// 嗯，需要一个T
+class TypeToID<T*>						// 我要对所有的指针类型特化，所以这里就写T*
+{
+public:
+	typedef T		 SameAsT;
+	static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+};
+
+void PrintID()
+{
+	cout << "ID of float*: " << TypeToID< TypeToID<float*>::SameAsT >::ID << endl;
+}
+```
+
+别急着运行，你先猜。
+
+-------------------------  这里是给勤于思考的码猴的分割线  -------------------------------
+
+OK，猜出来了吗，T是`float`。为什么呢？因为你用 `float *` 匹配了 `T *`，所以 `T` 就对应 `float` 了。没想清楚的自己再多体会一下。
+
+嗯，所以实际上，我们可以利用这个特性做一件事情：把指针类型的那个指针给“干掉”：
+
+``` C++
+template <typename T>
+class RemovePointer
+{
+	// 啥都不干，你要放一个不是指针的类型进来，我就让你死的难看。
+};
+
+template <typename T>
+class RemovePointer<T*>	// 祖传牛皮藓，专治各类指针
+{
+public:
+	typedef T Result;
+};
+
+void Foo()
+{
+	RemovePointer<float*>::Result x = 5.0f;		// 喏，用RemovePointer后，那个Result就是把float*的指针处理掉以后的结果：float啦。
+	std::cout << x << std::endl;
+}
+```
+
+OK，如果这个时候，我需要给 `int*` 提供一个更加特殊的特化，那么我还得都多提供一个：
+
+``` C++
+// ...
+// TypeToID 的其他代码，略过不表
+// ...
+
+template <typename T>					// 嗯，需要一个T
+class TypeToID<T*>						// 我要对所有的指针类型特化，所以这里就写T*
+{
+public:
+	typedef T		 SameAsT;
+	static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+};
+
+template <>								// 嗯，int* 已经是个具体的不能再具体的类型了，所以模板不需要额外的类型参数了
+class TypeToID<int*>					// 嗯，对int*的特化。在这里呢，要把int*整体看作一个类型。
+{
+public:
+	static int const ID = 0x12345678;	// 给一个缺心眼的ID
+};
+
+void PrintID()
+{
+	cout << "ID of int*: " << TypeToID<int*>::ID << endl;
+}
+```
+
+嗯，这个时候它会输出0x12345678的十进制（大概？）。
+可能会有较真的人说，`int*` 去匹配 `T` 或者 `T*`，也是合法的。就和你说22岁以上能结婚，那24岁当然也能结婚一样。
+那为什么 `int*` 就会找 `int*`，`float *`因为没有合适的特化就去找 `T*`，更一般的就去找 `T` 呢？废话，有专门为你准备的东西的不用，人干事？这就是直觉。
+但是呢，直觉对付更加复杂的问题还是没用的（也不是没用，主要是你没这个直觉了）。我们要把这个直觉，转换成合理的规则————即模板的匹配规则。
+当然，这个匹配规则是对复杂问题用的，所以我们会到实在一眼看不出来的时候才会动用它。一开始我们只要把握：匹配手机从最特殊到最一般的原则就可以了。
+
 
 ###2.3 函数模板的重载、参数匹配、特化与部分特化
 ###2.4 技巧单元：模板与继承
