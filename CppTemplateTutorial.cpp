@@ -207,6 +207,36 @@ namespace _2_2_3
 
 	template <> class TypeToID<int const * volatile * const volatile>;
 }
+
+namespace _2_2_4
+{
+	template <typename T> struct X {};
+	
+	template <typename T> struct Y
+	{
+		typedef X<T> ReboundType;
+		typedef typename X<T>::MemberType MemberType;
+#if WRONG_CODE_ENABLED
+		typedef WTF MemberType3;
+#endif
+
+		static void foo()
+		{
+			X<T> instance0;
+			X<T>::MemberType instan
+			WTF instance2
+			大王叫我来巡山 - + &
+		}
+	};
+
+	void foo()
+	{
+#if WRONG_CODE_ENABLED
+		Y<int>::foo();
+#endif
+	}
+}
+
 // 1.4 Specialization, Partial Specialization, Full Specialization
 namespace _1_4
 {
