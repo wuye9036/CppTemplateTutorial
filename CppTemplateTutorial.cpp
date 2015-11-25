@@ -215,15 +215,15 @@ namespace _2_2_4
 	template <typename T> struct Y
 	{
 		typedef X<T> ReboundType;
-		typedef typename X<T>::MemberType MemberType;
 #if WRONG_CODE_ENABLED
+		typedef typename X<T>::MemberType MemberType;
 		typedef WTF MemberType3;
 #endif
 
 		static void foo()
 		{
 			X<T> instance0;
-			X<T>::MemberType instan
+			typename X<T>::MemberType instance1;
 			WTF instance2
 			大王叫我来巡山 - + &
 		}
@@ -233,7 +233,32 @@ namespace _2_2_4
 	{
 #if WRONG_CODE_ENABLED
 		Y<int>::foo();
+		Y<float>::foo();
 #endif
+	}
+}
+
+namespace _2_3_3 {
+	struct A;
+	template <typename T>
+	struct X
+	{
+		void foo(T v) {
+			A a;
+			a.v = v;
+		}
+	};
+
+	struct A
+	{
+		int v;
+	};
+
+	int foo2()
+	{
+		X<int> x;
+		x.foo(5);
+		return 0;
 	}
 }
 
