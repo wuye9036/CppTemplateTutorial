@@ -1512,10 +1512,7 @@ error: variable has incomplete type 'A'
 ```C++
 struct A;
 template <typename T> struct X {
-    void foo(T v) {
-       A a;
-       a.v = v;
-    }
+    void foo(T v);
 };
 
 struct A { int v; };
