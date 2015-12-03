@@ -1533,7 +1533,7 @@ void main() {
 
 扩展阅读： [The Dreaded Two-Phase Name Lookup][2]
 
-#2.3.3 “多余的”  typename 关键字
+####2.3.3 “多余的”  typename 关键字
 
 到了这里，2.3.1 中提到的四个问题，还有三个没有解决：
 
