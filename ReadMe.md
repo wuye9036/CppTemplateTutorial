@@ -618,9 +618,9 @@ typedef Stack<float> StackFloat;
 
 ```
 Int8,16: N/A
-Int32  : VInt32Mul(int32 * 4, int32 * 4)
-Int64  : VInt64Mul(int64 * 2, int64 * 2)
-Float  : VInt64Mul(float * 2, float * 2)
+Int32  : VInt32Mul(int32x4, int32x4)
+Int64  : VInt64Mul(int64x4, int64x4)
+Float  : VInt64Mul(floatx2, floatx2)
 ```
 所以对于Int8和Int16，我们需要提升到Int32，而Int32和Int64，各自使用自己的指令。所以我们需要实现下的逻辑：
 
@@ -641,10 +641,10 @@ for(v4a, v4b : vectorsA, vectorsB)
 嗯，聪明你果然想到了，重载也可以解决这个问题。
 
 ``` C++
-GenericMul(int8  * 4, int8  * 4);
-GenericMul(int16 * 4, int16 * 4);
-GenericMul(int32 * 4, int32 * 4);
-GenericMul(int64 * 4, int64 * 4);
+GenericMul(int8x4,  int8x4);
+GenericMul(int16x4, int16x4);
+GenericMul(int32x4, int32x4);
+GenericMul(int64x4, int64x4);
 // 其它 Generic Mul ...
 
 for(v4a, v4b : vectorsA, vectorsB)
