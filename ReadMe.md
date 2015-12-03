@@ -1550,7 +1550,7 @@ template <typename T> struct Y
 
 我们运用我们2.3.2节中学习到的标准，来对Y内部做一下分析：
 
-```
+```C++
 template <typename T> struct Y
 {
     // X可以查找到原型；
