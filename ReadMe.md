@@ -949,8 +949,8 @@ class AddFloatOrMulInt<int>
 // 以及模板参数列表
 template </* 这里要填什么？ */> class AddFloatOrMulInt<int>;
 
-// 最后，模板参数列表里面填什么？因为原型的T已经被int取代了。所以这里就不能放任何额外的参数了。
-// 所以这里要放空。
+// 最后，模板参数列表里面填什么？因为原型的T已经被int取代了。所以这里就不能也不需要放任何额外的参数了。
+// 所以这里放空。
 template <> class AddFloatOrMulInt<int>
 {
 	// ... 针对Int的实现 ... 
@@ -1090,8 +1090,8 @@ void copy(void* dst, void const* src, size_t elemSize, size_t elemCount, void (*
 ```
 
 为什么要提供copyElem，是因为可能有些struct需要深拷贝，所以得用特殊的copy函数。这个在C++98/03里面就体现为拷贝构造和赋值函数。
-但是不管怎么搞，因为这个函数的参数只是`void*`而已，当你使用了错误的elemSize，或者传入了错误的copyElem，就必须要到运行的时候才有可能看出来。注意，这还只是有可能而已。
 
+但是不管怎么搞，因为这个函数的参数只是`void*`而已，当你使用了错误的elemSize，或者传入了错误的copyElem，就必须要到运行的时候才有可能看出来。注意，这还只是有可能而已。
 
 那么C++有了模板后，能否既能匹配任意类型的指针，同时又保留了类型信息呢？答案是显然的。至于怎么写，那就得充分发挥你的直觉了：
 
@@ -1115,6 +1115,7 @@ void copy(T* dst, T const* src, size_t elemCount);
 ```
 
 编译一下，咦，居然通过了。看来这里的语法与我们以前学到的知识并没有什么不同。这也是语言设计最重要的一点原则：一致性。它可以让你辛辛苦苦体验到的规律不至于白费。
+
 最后就是实现：
 
 ``` C++
@@ -1387,7 +1388,7 @@ template <typename T> struct X {
 
 接下来，我们就来解决2.3.1节中留下的几个问题。
 
-先看第四个问题。为什么MSVC中，模板函数的定义内不管填什么编译器都不报错？因为MSVC在分析模板定义时没有做任何事情。至于为啥连“大王叫我来巡山”都能过得去，这是C++语法/语义分析的特殊性导致的。
+先看第四个问题。为什么MSVC中，模板函数的定义内不管填什么编译器都不报错？因为MSVC在分析模板中成员函数定义时没有做任何事情。至于为啥连“大王叫我来巡山”都能过得去，这是C++语法/语义分析的特殊性导致的。
 C++是个非常复杂的语言，以至于它的编译器，不可能通过词法-语法-语义多趟分析清晰分割。因为它的语义将会直接干扰到语法：
 
 ```C++
@@ -1399,7 +1400,7 @@ void foo(){
 
 甚至词法分析也会受到语义的干扰，C++11中才明确被修正的`vector<vector<int>>`，就因为`>>`被误解为右移或流操作符，而导致某些编译器上的错误。因此，在语义没有确定之前，连语法都没有分析的价值。
 
-大约是基于如此考量，为了偷懒，MSVC将包括所有的语法/语义分析工作都挪到了第二个Phase，于是乎连带着语法分析都送进了第二个阶段。符合标准么？显然不符合。
+大约是基于如此考量，为了偷懒，MSVC将包括所有模板成员函数的语法/语义分析工作都挪到了第二个Phase，于是乎连带着语法分析都送进了第二个阶段。符合标准么？显然不符合。
 
 但是这里值得一提的是，MSVC的做法和标准相比，虽然投机取巧，但并非有弊无利。我们来先说一说坏处。考虑以下例子：
 ```C++
@@ -1483,9 +1484,9 @@ error: no type named 'MemberType' in 'X<float>'
 ```C++
 struct A;
 template <typename T> struct X {
-    void foo(T v) {
-       A a;
-       a.v = v;
+    int v;
+    void convertTo(A& a) {
+       a.v = v; // 这里需要A的实现
     }
 };
 
@@ -1512,16 +1513,13 @@ error: variable has incomplete type 'A'
 ```C++
 struct A;
 template <typename T> struct X {
-    void foo(T v) {
-       A a;
-       a.v = v;
-    }
+    int v;
+    void convertTo(A& a);
 };
 
 struct A { int v; };
 
-template <typename T> void X<T>::foo(T v) {
-   A a;
+template <typename T> void X<T>::convertTo(A& a) {
    a.v = v;
 }
     
@@ -1531,18 +1529,97 @@ void main() {
 }
 ```
 
-但是其实我们知道，`foo`要到实例化之后，才需要真正的做语义分析。在MSVC上，因为函数实现就是到模板实例化时才处理的，所以这个例子是完全正常工作的。
-
-在实际应用中，我们经常既希望把模板类成员函数的声明和实现放到一起，因为模板函数看不到实现也很难调用；又希望一般类型可以声明定义分离，把类型定义隐藏到源文件中，以完成声明实现分离。
-
-此时如果编译器是符合标准的，我们只能将模板头文件拆分成`<X.h>`和`<X.impl.h>`两个部分，并按照顺序引用两个文件。但是在MSVC中就可以直接将模板函数的实现，和一般类型的声明放在一起，反而更加简单清晰。
+但是其实我们知道，`foo`要到实例化之后，才需要真正的做语义分析。在MSVC上，因为函数实现就是到模板实例化时才处理的，所以这个例子是完全正常工作的。因此在上面这个例子中，MSVC的实现要比标准更加易于写和维护，是不是有点写Java/C#那种声明实现都在同一处的清爽感觉了呢！
 
 扩展阅读： [The Dreaded Two-Phase Name Lookup][2]
-###2.4 函数模板的重载、参数匹配、特化与部分特化
-###2. 技巧单元：模板与继承
 
+#2.3.3 “多余的”  typename 关键字
 
-## 3   拿起特化的武器，去写程序吧！
+到了这里，2.3.1 中提到的四个问题，还有三个没有解决：
+
+```C++
+template <typename T> struct X {};
+	
+template <typename T> struct Y
+{
+	typedef X<T> ReboundType;						// 这里为什么是正确的？
+	typedef typename X<T>::MemberType MemberType2;	// 这里的typename是做什么的？
+	typedef UnknownType MemberType3;				// 这里为什么会出错？
+};
+```
+
+我们运用我们2.3.2节中学习到的标准，来对Y内部做一下分析：
+
+```
+template <typename T> struct Y
+{
+    // X可以查找到原型；
+    // X<T>是一个依赖性名称，模板定义阶段并不管X<T>是不是正确的。
+	typedef X<T> ReboundType;
+	
+	// X可以查找到原型；
+	// X<T>是一个依赖性名称，X<T>::MemberType也是一个依赖性名称；
+	// 所以模板声明时也不会管X模板里面有没有MemberType这回事。
+	typedef typename X<T>::MemberType MemberType2;
+	
+	// UnknownType 不是一个依赖性名称
+	// 而且这个名字在当前作用域中不存在，所以直接报错。
+	typedef UnknownType MemberType3;				
+};
+```
+
+下面，唯一的问题就是第二个：`typename`是做什么的？
+
+对于用户来说，这其实是一个语法噪音。也就是说，其实就算没有它，语法上也说得过去。事实上，某些情况下MSVC的确会在标准需要的时候，不用写`typename`。但是标准中还是规定了形如 `T::MemberType` 这样的`qualified id` 在默认情况下不是一个类型，而是解释为`T`的一个成员变量`MemberType`，只有当`typename`修饰之后才能作为类型出现。
+
+事实上，标准对`typename`的使用规定极为复杂，也算是整个模板中的难点之一。如果想了解所有的标准，需要阅读标准14.6节下2-7条，以及14.6.2.1第一条中对于`current instantiation`的解释。
+
+简单来说，如果编译器能在出现的时候知道它的类型，那么就不需要`typename`，如果必须要到实例化的时候才能知道它是不是合法，那么定义的时候就把这个名称作为变量而不是类型。
+
+在这里，我举几个例子帮助大家理解`typename`的用法，这几个例子已经足以涵盖日常使用[（预览）][3]：
+
+```C++
+struct A;
+template <typename T> struct B;
+template <typename T> struct X {
+    typedef X<T> _A; // 编译器当然知道 X<T> 是一个类型。
+    typedef X    _B; // X 等价于 X<T> 的缩写
+    typedef T    _C; // T 不是一个类型还玩毛
+    
+    // ！！！注意我要变形了！！！
+    class Y {
+        typedef X<T>     _D;          // X 的内部，既然外部高枕无忧，内部更不用说了
+        typedef X<T>::Y  _E;          // 嗯，这里也没问题，编译器知道Y就是当前的类型，
+                                      // 这里在VS2015上会有错，需要添加 typename，
+                                      // Clang 上顺利通过。
+        typedef typename X<T*>::Y _F; // 这个居然要加 typename！
+                                      // 因为，X<T*>和X<T>不一样哦，
+                                      // 它可能会在实例化的时候被别的偏特化给抢过去实现了。
+    };
+    
+    typedef A _G;                   // 嗯，没问题，A在外面声明啦
+    typedef B<T> _H;                // B<T>也是一个类型
+    typedef typename B<T>::type _I; // 嗯，因为不知道B<T>::type的信息，
+                                    // 所以需要typename
+    typedef B<int>::type _J;        // B<int> 不依赖模板参数，
+                                    // 所以编译器直接就实例化（instantiate）了
+                                    // 但是这个时候，B并没有被实现，所以就出错了
+};
+```
+
+### 2.4 本章小结
+
+这一张是写作中最艰难的一章，中间停滞了将近一年。因为要说清楚C++模板中一些语法噪音和设计决议并不是一件轻松的事情。不过通过这一章的学习，我们知道了下面这几件事情：
+
+1. **部分特化/偏特化** 和 **特化** 相当于是模板实例化过程中的`if-then-else`。这使得我们根据不同类型，选择不同实现的需求得以实现；
+
+2. 在 2.3.3 一节我们插入了C++模板中最难理解的内容之一：名称查找。名称查找是语义分析的一个环节，模板内书写的 **变量声明**、**typedef**、**类型名称** 甚至 **类模板中成员函数的实现** 都要符合名称查找的规矩才不会出错；
+
+3. C++编译器对语义的分析的原则是“大胆假设，小心求证”：在能求证的地方尽量求证 —— 比如两段式名称查找的第一阶段；无法检查的地方假设你是正确的 —— 比如`typedef typename A<T>::MemberType _X;`在模板定义时因为`T`不明确不会轻易判定这个语句的死刑。
+
+从下一章开始，我们将进入元编程环节。我们将使用大量的示例，一方面帮助巩固大家学到的模板知识，一方面也会引导大家使用函数式思维去解决常见的问题。
+
+## 3   拿起武器，去写程序吧！
 ###3.1 利用模板特化规则实现If-Then-Else与Switch-Case
 ###3.2 特化可以有多个选择：替换失败并不是一个错误，只是一种可能
 ###3.3 技巧单元：获得类型的属性——类型萃取（Type Traits） 
@@ -1581,3 +1658,4 @@ alexandrescu 关于 min max 的讨论：《再谈Min和Max》
 
   [1]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf
   [2]: http://blog.llvm.org/2009/12/dreaded-two-phase-name-lookup.html
+  [3]: https://goo.gl/zCRNYx
