@@ -1369,7 +1369,7 @@ template <typename T> foo(T& v0, C& v1){
 int a;
 struct B { int v; }
 template <typename T> struct X {
-    B b;                  // B 是第三类名字，b 是第二类
+    B b;                  // B 是第三类名字，b 是第一类
     T t;                  // T 是第二类
     X* anthor;            // X 这里代指 X<T>，第一类
     typedef int Y;        // int 是第三类
@@ -1640,7 +1640,7 @@ template <typename T> struct X {
 ###6.2 Template-Template Class
 ###6.3 技巧单元：高阶函数——从函数到函数的组合
 ###6.4 实战单元：STL中的Allocator Rebinder
-###6.5 像看堆栈一样的看出错信息
+###6.5 更好的编译器，更友善的出错信息
 ###6.6 模板的症结：易于实现，难于完美
 
 alexandrescu 关于 min max 的讨论：《再谈Min和Max》
@@ -1650,6 +1650,7 @@ alexandrescu 关于 min max 的讨论：《再谈Min和Max》
 ###7.2 Reactor风格的编程
 ###7.3 Reactor与Linq
 ###7.4 Linq的C++实践
+###7.5 Boost.Hana
 ###7.5 更高更快更强：从Linq到FP
 
 ## 8   结语：讨论有益，争端无用
