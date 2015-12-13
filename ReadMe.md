@@ -1622,6 +1622,117 @@ template <typename T> struct X {
 ## 3   深入理解特化与偏特化
 
 ###3.1 正确的理解偏特化
+在前面的章节中，我们介绍了偏特化的形式、也介绍了简单的用例。因为偏特化和函数重载存在着形式上的相似性，因此初学者便会借用重载的概念，来理解偏特化的行为。只是，重载和偏特化尽管相似但仍有差异。
+
+我们来先看一个函数重载的例子：
+
+```C++
+void doWork(int);
+void doWork(float);
+void doWork(int, int);
+
+void f() {
+    doWork(0);
+    doWork(0.5f);
+    doWork(0, 0);
+}
+```
+
+在这个例子中，我们展现了函数重载可以在两种条件下工作：参数数量相同、类型不同；参数数量不同。
+
+仿照重载的形式，我们通过特化机制，试图实现一个模板的“重载”：
+
+```C++
+template <typename T> struct DoWork;	 // (0) 这是原型
+
+template <> struct DoWork<int> {};       // (1) 这是 int 类型的"重载"
+template <> struct DoWork<float> {};     // (2) 这是 float 类型的"重载"
+template <> struct DoWork<int, int> {};  // (3) 这是 int, int 类型的“重载”
+
+void f(){
+    DoWork<int>      i;
+    DoWork<float>    f;
+    DoWork<int, int> ii;
+}
+```
+
+这个例子在字面上“看起来”并没有什么问题，可惜编译器在编译的时候仍然提示出错了（http://goo.gl/zI42Zv）：
+
+```
+5 : error: too many template arguments for class template 'DoWork'
+template <> struct DoWork<int, int> {}; // 这是 int, int 类型的“重载”
+^ ~~~~
+1 : note: template is declared here
+template <typename T> struct DoWork {}; // 这是原型
+~~~~~~~~~~~~~~~~~~~~~ ^
+```
+
+从编译出错的失望中冷静一下，在仔细看看函数特化/偏特化和一般模板的不同之处：
+
+```C++
+template <typename T> class X      {};
+template <typename T> class X <T*> {};
+//                            ^^^^ 注意这里
+```
+
+对，就是这个`<T*>`，跟在X后面的小尾巴，决定了第二条语句是第一条语句的跟班。所以，第二条语句即“偏特化”，必须要符合X的基本形式，那就是只有一个参数。这也是为什么`DoWork`尝试以`template <> struct DoWork<int, int>`的形式偏特化的时候，编译器会提示参数数量过多。
+
+另外一方面，在类模板的实例化阶段，它并不会直接去寻找 `template <> struct DoWork<int, int>`这个小跟班，而是会先找到基本形式，`template <typename T> struct DoWork;`，然后再去寻找相应的特化。
+
+我们以`DoWork<int> i;`为例，尝试复原一下编译器完成整个模板匹配过程的场景，帮助大家理解。看以下示例代码：
+
+```C++
+template <typename T> struct DoWork;	 // (0) 这是原型
+
+template <> struct DoWork<int> {};       // (1) 这是 int 类型的"重载"
+template <> struct DoWork<float> {};     // (2) 这是 float 类型的"重载"
+
+DoWork<int> i; // (3)
+```
+
+1. 编译器分析(0), (1), (2)三句，得知(0)是模板的原型，(1)，(2)两句是模板(0)匹配的特例。我们假设有两个字典，第一个字典存储了模板原型，我们称之为`TemplateDict`。第二个字典`TemplateSpecDict`，存储了模板原型所对应的特化/偏特化形式。所以编译器在这三句时，可以视作`TemplateDict.add(DoWork<T>)`，以及 `TemplateSpecDict.get(DoWork<T>).add(int);` 和 `TemplateSpecDict.get(DoWork<T>).add(float);`
+
+2. (4) 试图以`int`实例化类模板`DoWork`。它会在TemplateDict中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。
+
+3. 编译器这个时候就想了，那它会不会有针对int的特化呢？于是就去`TemplateSpecDict`中查找，发现果然有`DoWork<int>`的存在，于是就使用了这个特例。
+
+那么根据上面的步骤所展现的基本原理，我们就能知道了，特化形式`struct X<T>`的这个小尾巴，也要和`X`的原型相匹配：
+
+```C++
+template <typename T, typename U> struct X            ;    // 0 原型有两个类型参数
+
+// 下面的这些偏特化的“小尾巴”也需要两个类型参数对应
+template <typename T>             struct X<T,  T  > {};    // 1
+template <typename T>             struct X<T*, T  > {};    // 2
+template <typename T>             struct X<T,  T* > {};    // 3
+template <typename U>             struct X<U,  int> {};    // 4
+template <typename U>             struct X<U*, int> {};    // 5
+template <typename U, typename T> struct X<U*, T* > {};    // 6
+template <typename U, typename T> struct X<U,  T* > {};    // 7
+
+template <typename T>             struct X<unique_ptr<T>, shared_ptr<T>>; // 8
+
+// 以下特化，分别对应哪个偏特化的实例？
+
+X<float*,  int>      v0;                       
+X<double*, int>      v1;                       
+X<double,  double>   v2;                          
+X<float*,  double*>  v3;                           
+X<float*,  float*>   v4;                          
+X<double,  float*>   v5;                          
+X<int,     double*>  v6;                           
+X<int*,    int>      v7;                       
+X<double*, double>   v8;
+```
+
+在上面这段例子中，有几个值得注意之处。首先，偏特化时的模板参数，和原型的模板参数没有任何关系，它只为偏特化这一句服务。这也是为什么在特化的时候所有类型都确定了，我们就可以抛弃全部的模板参数，写出`template <> struct X<int, float>`这样的形式。
+
+其次，作为一个模式匹配，偏特化中展现出来的模式，就是它能被匹配的精髓。比如，`struct X<T, T>`中，要求模板的两个参数必须是相同的类型。而`struct X<T, T*>`，则代表第二个模板类型参数必须是第一个模板类型参数的指针，比如`X<float***, float****>`就能匹配上。当然，除了简单的指针、`const`和`volatile`修饰符，其他的类模板也可以作为偏特化时的“模式”出现，例如示例8，它要求传入同一个类型的`unique_ptr`和`shared_ptr`。
+
+对于某些实例化，偏特化的选择并不是唯一的。比如v4的参数是`<float*, float*>`，能够匹配的就有三条规则，1，6和7。很显然，6还是比7好一些，因为能多匹配一个指针。但是1和6，就很难说清楚谁更好了。一个说明了两者类型相同；另外一个则说明了两者都是指针。所以在这里，编译器也没办法决定使用那个，只好爆出了编译器错误。
+
+嘿嘿，自己上编译器看看吧(http://goo.gl/9UVzje)。
+
 ###3.2 后悔药：SFINAE
 ###3.3 实战单元：获得类型的属性——类型萃取（Type Traits） 
 
