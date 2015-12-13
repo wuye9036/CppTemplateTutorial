@@ -1675,7 +1675,7 @@ template <typename T> class X <T*> {};
 //                            ^^^^ 注意这里
 ```
 
-对，就是这个`<T*>`，跟在X后面的小尾巴，决定了第二条语句是第一条语句的跟班。所以，第二条语句即“偏特化”，必须要符合X的基本形式，那就是只有一个参数。这也是为什么`DoWork`尝试以`template <> struct DoWork<int, int>`的形式偏特化的时候，编译器会提示参数数量过多。
+对，就是这个`<T*>`，跟在X后面的小尾巴，决定了第二条语句是第一条语句的跟班。所以，第二条语句，即“偏特化”，必须要符合原型X的基本形式，那就是只有一个参数。这也是为什么`DoWork`尝试以`template <> struct DoWork<int, int>`的形式偏特化的时候，编译器会提示参数数量过多。
 
 另外一方面，在类模板的实例化阶段，它并不会直接去寻找 `template <> struct DoWork<int, int>`这个小跟班，而是会先找到基本形式，`template <typename T> struct DoWork;`，然后再去寻找相应的特化。
 
@@ -1692,16 +1692,17 @@ DoWork<int> i; // (3)
 
 1. 编译器分析(0), (1), (2)三句，得知(0)是模板的原型，(1)，(2)两句是模板(0)匹配的特例。我们假设有两个字典，第一个字典存储了模板原型，我们称之为`TemplateDict`。第二个字典`TemplateSpecDict`，存储了模板原型所对应的特化/偏特化形式。所以编译器在这三句时，可以视作`TemplateDict.add(DoWork<T>)`，以及 `TemplateSpecDict.get(DoWork<T>).add(int);` 和 `TemplateSpecDict.get(DoWork<T>).add(float);`
 
-2. (4) 试图以`int`实例化类模板`DoWork`。它会在TemplateDict中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。
+2. (3) 试图以`int`实例化类模板`DoWork`。它会在`TemplateDict`中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。
 
-3. 编译器这个时候就想了，那它会不会有针对int的特化呢？于是就去`TemplateSpecDict`中查找，发现果然有`DoWork<int>`的存在，于是就使用了这个特例。
+3. 编译器这个时候就想了，那它会不会有针对`int`的特化呢？于是就去`TemplateSpecDict`中查找，发现果然有`DoWork<int>`的存在，就使用了这个特例。
 
-那么根据上面的步骤所展现的基本原理，我们就能知道了，特化形式`struct X<T>`的这个小尾巴，也要和`X`的原型相匹配：
+那么根据上面的步骤所展现的基本原理，我们随便来几个练习：
 
 ```C++
-template <typename T, typename U> struct X            ;    // 0 原型有两个类型参数
-
-// 下面的这些偏特化的“小尾巴”也需要两个类型参数对应
+template <typename T, typename U> struct X            ;    // 0 
+                                                           // 原型有两个类型参数
+                                                           // 所以下面的这些偏特化的“小尾巴”
+                                                           // 也需要两个类型参数对应
 template <typename T>             struct X<T,  T  > {};    // 1
 template <typename T>             struct X<T*, T  > {};    // 2
 template <typename T>             struct X<T,  T* > {};    // 3
