@@ -1770,7 +1770,7 @@ template <> struct DoWork<int,    int> {};  // (3) 这是 int, int 类型的“�
 
 显而易见这个解决方案并不那么完美。首先，不管是偏特化还是用户实例化模板的时候，都需要多撰写好几个`void`，而且最长的那个参数越长，需要写的就越多；其次，如果我们的`DoWork`在程序维护的过程中新加入了一个参数列表更长的实例，那么最悲惨的事情就会发生 —— 原型、每一个偏特化、每一个实例化都要追加上`void`以凑齐新出现的实例所需要的参数数量。
 
-所幸模板参数也有一个和函数参数相同的特性：默认实参（Default Arguments）。一个例子你们就看明白了：
+所幸模板参数也有一个和函数参数相同的特性：默认实参（Default Arguments）。只需要一个例子，你们就能看明白了（http://goo.gl/TtmcY9）：
 
 ```C++
 template <typename T0, typename T1 = void> struct DoWork;
