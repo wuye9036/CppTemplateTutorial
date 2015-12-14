@@ -1744,7 +1744,49 @@ X<double*, double>   v8;
 
 其他的示例可以先自己推测一下， 再去编译器上尝试一番 (http://goo.gl/9UVzje)。
 
-再回到第一个例子`DoWork`。
+不过这个时候也许你还不死心。有没有一种办法能够让最初的例子`DoWork`像重载一样的支持多个参数呢？答案当然是肯定的。
+
+首先，首先我们要让模板实例化时的模板参数统一到相同形式上。逆向思维一下，虽然两个类型参数我们很难缩成一个参数，但是我们可以通过添加额外的参数，把一个扩展成两个呀。比如这样：
+
+```C++
+DoWork<int,   void> i;
+DoWork<float, void> f;
+DoWork<int,   int > ii;
+```
+
+这时，我们就能写出统一的模板原型：
+
+```C++
+template <typename T0, typename T1> struct DoWork;
+```
+
+继而偏特化/特化问题也解决了：
+
+```C++
+template <> struct DoWork<int,   void> {};  // (1) 这是 int 类型的"重载"
+template <> struct DoWork<float, void> {};  // (2) 这是 float 类型的"重载"
+template <> struct DoWork<int,    int> {};  // (3) 这是 int, int 类型的“重载”
+```
+
+显而易见这个解决方案并不那么完美。首先，不管是偏特化还是用户实例化模板的时候，都需要多撰写好几个`void`，而且最长的那个参数越长，需要写的就越多；其次，如果我们的`DoWork`在程序维护的过程中新加入了一个参数列表更长的实例，那么最悲惨的事情就会发生 —— 原型、每一个偏特化、每一个实例化都要追加上`void`以凑齐新出现的实例所需要的参数数量。
+
+所幸模板参数也有一个和函数参数相同的特性：默认实参（Default Arguments）。一个例子你们就看明白了：
+
+```C++
+template <typename T0, typename T1 = void> struct DoWork;
+
+template <typename T> struct DoWork<T> {};
+template <>           struct DoWork<int> {};
+template <>           struct DoWork<float> {};
+template <>           struct DoWork<int, int> {};
+
+DoWork<int> i;
+DoWork<float> f;
+DoWork<double> d;
+DoWork<int, int> ii;
+```
+
+所有参数不足，即原型中参数`T1`没有指定的地方，都由T1自己的默认参数`void`补齐了。
 
 ###3.2 后悔药：SFINAE
 ###3.3 实战单元：获得类型的属性——类型萃取（Type Traits） 
