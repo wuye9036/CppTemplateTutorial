@@ -1788,6 +1788,33 @@ DoWork<int, int> ii;
 
 所有参数不足，即原型中参数`T1`没有指定的地方，都由T1自己的默认参数`void`补齐了。
 
+但是这个方案仍然有些美中不足之处。
+
+比如，尽管我们默认了所有无效的类型都以`void`结尾，所以正确的类型列表应该是类似于`<int, float, char, void, void>`这样的形态。但你阻止不了你的用户写出类似于`<void, int, void, float, char, void, void>`这样奇怪的类型参数列表。
+
+其次，假设这段代码中有一个函数，它的参数使用了和类模板相同的参数列表类型，如下面这段代码：
+
+```C++
+template <typename T0, typename T1 = void> struct X {
+    static void call(T0 const& p0, T1 const& p1);        // 0
+};
+
+template <typename T0> struct X<T0> {
+    static void call(T0 const& p0);                      // 1
+};
+
+void foo(){
+    X<int>::call(5);                // 调用函数 1
+    X<int, float>::call(5, 0.5f);   // 调用函数 0
+}
+```
+
+那么，每加一个参数就要多写一个偏特化的形式，甚至还要重复编写一些可以共享的实现。
+
+为了解决这几个问题，在C++11中，引入了变参模板（Variadic Template）。
+
+
+
 ###3.2 后悔药：SFINAE
 ###3.3 实战单元：获得类型的属性——类型萃取（Type Traits） 
 
