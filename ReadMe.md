@@ -1876,30 +1876,35 @@ template <typename... Ts, typename U> class Y<Ts..., U> {};    // (4) error!
 ###4.2 将循环变成递归，将分支变成递归，将一切变成递归
 ###4.3 实战单元：元编程的Fibonacci数列
 
-## 5   元编程下的算法
+## 5   元编程下的数据结构与算法
 ###5.1 列表与数组
 ###5.2 字典结构
 ###5.3 “快速”排序
+###5.4 其它常用的“轮子”
+boost.mpl
 
-## 6   关于模板，你还需要知道的其它常识
-###6.1 类中类：灵活的模板定义
+## 6   模板的进阶技巧
+###6.1 嵌入类
 ###6.2 Template-Template Class
-###6.3 技巧单元：高阶函数——从函数到函数的组合
-###6.4 实战单元：STL中的Allocator Rebinder
-###6.5 更好的编译器，更友善的出错信息
-###6.6 模板的症结：易于实现，难于完美
-
-alexandrescu 关于 min max 的讨论：《再谈Min和Max》
+###6.3 高阶函数
+###6.4 闭包：模板的“基于对象”
+stl allocator?
+mpl::apply
+###6.5 占位符(placeholder)：在C++中实现方言的基石
+###6.6 编译期“多态”
 
 ## 7   模板的威力：从foreach, transform到Linq
 ###7.1 Foreach与Transform
-###7.2 Reactor风格的编程
-###7.3 Reactor与Linq
-###7.4 Linq的C++实践
-###7.5 Boost.Hana
-###7.6 更高更快更强：从Linq到FP
+###7.2 Boost中的模板
+Any Spirit Hana
+###7.3 Reactor、Linq与C++中的实践
+###7.4 更高更快更强：从Linq到FP
 
 ## 8   结语：讨论有益，争端无用
+###8.1 更好的编译器，更友善的出错信息
+###8.2 模板的症结：易于实现，难于完美
+
+alexandrescu 关于 min max 的讨论：《再谈Min和Max》
 
   [1]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf
   [2]: http://blog.llvm.org/2009/12/dreaded-two-phase-name-lookup.html
