@@ -1905,7 +1905,10 @@ Any Spirit Hana
 ###8.2 模板的症结：易于实现，难于完美
 
 alexandrescu 关于 min max 的讨论：《再谈Min和Max》
+std::experimental::any / boost.any 对于 reference 的处理
 
   [1]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf
+  
   [2]: http://blog.llvm.org/2009/12/dreaded-two-phase-name-lookup.html
+  
   [3]: https://goo.gl/zCRNYx
