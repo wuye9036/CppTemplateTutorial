@@ -1520,6 +1520,8 @@ error: variable has incomplete type 'A'
 
 符合标准的写法需要将模板类的定义，和模板函数的定义分离开：
 
+> TODO 此处例子不够恰当，并且描述有歧义。需要在未来版本中修订。
+
 ```C++
 struct A;
 template <typename T> struct X {
