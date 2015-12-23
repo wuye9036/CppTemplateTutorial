@@ -53,6 +53,8 @@ C++编译器众多，且对模板的支持可能存在细微差别。如果没�
 
 * 需增加：
   * 模板的使用动机。
+  * 增加“如何使用本文”一节。本节将说明全书的体例（强调字体、提示语、例子的组织），所有的描述、举例、引用在重审时将按照体例要求重新组织。
+  * 除了用于描述语法的例子外，其他例子将尽量赋予实际意义，以方便阐述意图。
 * 建议：
   * 比较模板和函数的差异性
   * 蓝色：C++14 Return type deduction for normal functions 的分析
@@ -1690,7 +1692,7 @@ template <typename T> class X <T*> {};
 //                            ^^^^ 注意这里
 ```
 
-对，就是这个`<T*>`，跟在X后面的小尾巴，决定了第二条语句是第一条语句的跟班。所以，第二条语句，即“偏特化”，必须要符合原型X的基本形式，那就是只有一个参数。这也是为什么`DoWork`尝试以`template <> struct DoWork<int, int>`的形式偏特化的时候，编译器会提示参数数量过多。
+对，就是这个`<T*>`，跟在X后面的“小尾巴”，我们称作实参列表，决定了第二条语句是第一条语句的跟班。所以，第二条语句，即“偏特化”，必须要符合原型X的基本形式：那就是只有一个模板参数。这也是为什么`DoWork`尝试以`template <> struct DoWork<int, int>`的形式偏特化的时候，编译器会提示模板实参数量过多。
 
 另外一方面，在类模板的实例化阶段，它并不会直接去寻找 `template <> struct DoWork<int, int>`这个小跟班，而是会先找到基本形式，`template <typename T> struct DoWork;`，然后再去寻找相应的特化。
 
@@ -1699,8 +1701,8 @@ template <typename T> class X <T*> {};
 ```C++
 template <typename T> struct DoWork;	 // (0) 这是原型
 
-template <> struct DoWork<int> {};       // (1) 这是 int 类型的"重载"
-template <> struct DoWork<float> {};     // (2) 这是 float 类型的"重载"
+template <> struct DoWork<int> {};       // (1) 这是 int 类型的特化
+template <> struct DoWork<float> {};     // (2) 这是 float 类型的特化
 
 DoWork<int> i; // (3)
 ```
@@ -1716,7 +1718,7 @@ DoWork<int> i; // (3)
 ```C++
 template <typename T, typename U> struct X            ;    // 0 
                                                            // 原型有两个类型参数
-                                                           // 所以下面的这些偏特化的“小尾巴”（实参列表）
+                                                           // 所以下面的这些偏特化的实参列表
                                                            // 也需要两个类型参数对应
 template <typename T>             struct X<T,  T  > {};    // 1
 template <typename T>             struct X<T*, T  > {};    // 2
@@ -1774,9 +1776,9 @@ template <typename T0, typename T1> struct DoWork;
 继而偏特化/特化问题也解决了：
 
 ```C++
-template <> struct DoWork<int,   void> {};  // (1) 这是 int 类型的"重载"
-template <> struct DoWork<float, void> {};  // (2) 这是 float 类型的"重载"
-template <> struct DoWork<int,    int> {};  // (3) 这是 int, int 类型的“重载”
+template <> struct DoWork<int,   void> {};  // (1) 这是 int 类型的特化
+template <> struct DoWork<float, void> {};  // (2) 这是 float 类型的特化
+template <> struct DoWork<int,    int> {};  // (3) 这是 int, int 类型的特化
 ```
 
 显而易见这个解决方案并不那么完美。首先，不管是偏特化还是用户实例化模板的时候，都需要多撰写好几个`void`，而且最长的那个参数越长，需要写的就越多；其次，如果我们的`DoWork`在程序维护的过程中新加入了一个参数列表更长的实例，那么最悲惨的事情就会发生 —— 原型、每一个偏特化、每一个实例化都要追加上`void`以凑齐新出现的实例所需要的参数数量。
