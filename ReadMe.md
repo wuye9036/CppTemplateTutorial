@@ -1851,6 +1851,8 @@ void foo(){
 
 ```C++
 // Tuple 的声明，来自 boost
+struct null_type;
+
 template <
   class T0 = null_type, class T1 = null_type, class T2 = null_type,
   class T3 = null_type, class T4 = null_type, class T5 = null_type,
@@ -1893,6 +1895,24 @@ template <typename... Ts, typename U> class Y<Ts..., U> {};    // (4) error!
 
 ####3.1.3 模板的默认实参
 
+在上一节中，我们介绍了模板对默认实参的支持。当时我们的例子很简单，默认模板实参是一个确定的类型`void`或者自定义的`null_type`：
+
+```C++
+template <
+    typename T0,
+    typename T1 = void,
+    typename T2 = void
+> class Tuple;
+```
+
+实际上，模板的默认参数不仅仅可以是一个确定的类型，它还能是以其他类型为参数的一个类型表达式。考虑下面的例子：
+
+```C++
+template <typename T> struct IsFloat {
+    static bool const value = true;
+}
+
+```
 
 
 ###3.2 后悔药：SFINAE
