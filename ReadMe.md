@@ -1943,7 +1943,7 @@ void foo(){
 
 在实例化的时候，尽管我们只为`SafeDivide`指定了参数`T`，但是它的另一个参数`IsFloat`在缺省的情况下，可以根据`T`，求出表达式`std::is_floating_point<T>::value`的值作为实参的值，带入到`SafeDivide`的匹配中。
 
-嗯，这个时候我们要再把整型和其他类型纳入进来，无外乎就是加这么一个参数（http://goo.gl/0Lqywt）：
+嗯，这个时候我们要再把整型和其他类型纳入进来，无外乎就是加这么一个参数（ http://goo.gl/0Lqywt ）：
 
 ```C++
 #include <complex>
