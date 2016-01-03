@@ -1905,15 +1905,84 @@ template <
 > class Tuple;
 ```
 
-实际上，模板的默认参数不仅仅可以是一个确定的类型，它还能是以其他类型为参数的一个类型表达式。考虑下面的例子：
+实际上，模板的默认参数不仅仅可以是一个确定的类型，它还能是以其他类型为参数的一个类型表达式。
+考虑下面的例子：我们要执行两个同类型变量的除法，它对浮点、整数和其他类型分别采取不同的措施。
+对于浮点，执行内置除法；对于整数，要处理除零保护，防止引发异常；对于其他类型，执行一个叫做`CustomeDiv`的函数。
 
+第一步，我们先把浮点正确的写出来：
 ```C++
-template <typename T> struct IsFloat {
-    static bool const value = true;
+#include <type_traits>
+
+template <typename T> T CustomDiv(T lhs, T rhs) {
+    // Custom Div的实现
 }
 
+template <typename T, bool IsFloat = std::is_floating_point<T>::value> struct SafeDivide {
+    static T Do(T lhs, T rhs) {
+        return CustomDiv(lhs, rhs);
+    }
+};
+
+template <typename T> struct SafeDivide<T, true>{     // 偏特化A
+    static T Do(T lhs, T rhs){
+        return lhs/rhs;
+    }
+};
+
+template <typename T> struct SafeDivide<T, false>{   // 偏特化B
+    static T Do(T lhs, T rhs){
+        return lhs;
+    }
+};
+
+void foo(){
+    SafeDivide<float>::Do(1.0f, 2.0f);	// 调用偏特化A
+    SafeDivide<int>::Do(1, 2);          // 调用偏特化B
+}
 ```
 
+在实例化的时候，尽管我们只为`SafeDivide`指定了参数`T`，但是它的另一个参数`IsFloat`在缺省的情况下，可以根据`T`，求出表达式`std::is_floating_point<T>::value`的值作为实参的值，带入到`SafeDivide`的匹配中。
+
+嗯，这个时候我们要再把整型和其他类型纳入进来，无外乎就是加这么一个参数：
+
+```C++
+#include <complex>
+#include <type_traits>
+
+template <typename T> T CustomDiv(T lhs, T rhs) {
+    T v;
+    // Custom Div的实现
+    return v;
+}
+
+template <
+    typename T,
+    bool IsFloat = std::is_floating_point<T>::value,
+    bool IsIntegral = std::is_integral<T>::value
+> struct SafeDivide {
+    static T Do(T lhs, T rhs) {
+        return CustomDiv(lhs, rhs);
+    }
+};
+
+template <typename T> struct SafeDivide<T, true, false>{    // 偏特化A
+    static T Do(T lhs, T rhs){
+        return lhs/rhs;
+    }
+};
+
+template <typename T> struct SafeDivide<T, false, true>{   // 偏特化B
+    static T Do(T lhs, T rhs){
+        return rhs == 0 ? 0 : lhs/rhs;
+    }
+};
+
+void foo(){
+    SafeDivide<float>::Do(1.0f, 2.0f);	                          // 调用偏特化A
+    SafeDivide<int>::Do(1, 2);                                    // 调用偏特化B
+    SafeDivide<std::complex<float>>::Do({1.f, 2.f}, {1.f, -2.f}); // 调用一般形式
+}
+```
 
 ###3.2 后悔药：SFINAE
 ###3.3 实战单元：获得类型的属性——类型萃取（Type Traits） 
