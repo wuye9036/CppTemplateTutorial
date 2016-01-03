@@ -1752,6 +1752,7 @@ template <typename U, typename T> struct X<U,  T* > {};    // 7
 template <typename T>             struct X<unique_ptr<T>, shared_ptr<T>>; // 8
 
 // 以下特化，分别对应哪个偏特化的实例？
+// 此时偏特化中的T或U分别是什么类型？
 
 X<float*,  int>      v0;                       
 X<double*, int>      v1;                       
@@ -1764,7 +1765,7 @@ X<int*,    int>      v7;
 X<double*, double>   v8;
 ```
 
-在上面这段例子中，有几个值得注意之处。首先，偏特化时的模板参数，和原型的模板参数没有任何关系，和原型不同，它的顺序完全不影响模式匹配的顺序，它只是偏特化模式，如`<U, int>`中`U`的声明，真正的模式，是由`<U, int>`体现出来的。
+在上面这段例子中，有几个值得注意之处。首先，偏特化时的模板参数，和原型的模板参数没有任何关系。和原型不同，它的顺序完全不影响模式匹配的顺序，它只是偏特化模式，如`<U, int>`中`U`的声明，真正的模式，是由`<U, int>`体现出来的。
 
 这也是为什么在特化的时候，当所有类型都已经确定，我们就可以抛弃全部的模板参数，写出`template <> struct X<int, float>`这样的形式：因为所有列表中所有参数都确定了，就不需要额外的形式参数了。
 
@@ -1983,6 +1984,63 @@ void foo(){
     SafeDivide<std::complex<float>>::Do({1.f, 2.f}, {1.f, -2.f}); // 调用一般形式
 }
 ```
+
+当然，这时也许你会注意到，`is_integral`，`is_floating_point`和其他类类型三者是互斥的，那能不能只使用一个条件量来进行分派呢？答案当然是可以的（ http://goo.gl/jYp5J2 ）：
+
+```C++
+#include <complex>
+#include <type_traits>
+
+template <typename T> T CustomDiv(T lhs, T rhs) {
+    T v;
+    // Custom Div的实现
+    return v;
+}
+
+template <typename T, typename Enabled = std::true_type> struct SafeDivide {
+    static T Do(T lhs, T rhs) {
+        return CustomDiv(lhs, rhs);
+    }
+};
+
+template <typename T> struct SafeDivide<
+    T, typename std::is_floating_point<T>::type>{    // 偏特化A
+    static T Do(T lhs, T rhs){
+        return lhs/rhs;
+    }
+};
+
+template <typename T> struct SafeDivide<
+    T, typename std::is_integral<T>::type>{          // 偏特化B
+    static T Do(T lhs, T rhs){
+        return rhs == 0 ? 0 : lhs/rhs;
+    }
+};
+
+void foo(){
+    SafeDivide<float>::Do(1.0f, 2.0f);	// 调用偏特化A
+    SafeDivide<int>::Do(1, 2);          // 调用偏特化B
+    SafeDivide<std::complex<float>>::Do({1.f, 2.f}, {1.f, -2.f});
+}
+```
+
+我们借助这个例子，帮助大家理解一下这个结构是怎么工作的：
+
+1. 对`SafeDivide<int>`
+
+  * 通过匹配类模板的泛化形式，计算默认实参，可以知道我们要匹配的模板实参是`SafeDivide<int, true_type>`
+  
+  * 计算两个偏特化的形式的匹配：A得到`<int, false_type>`,和B得到 `<int, true_type>`
+  
+  * 最后偏特化B的匹配结果和模板实参一致，使用它。
+  
+2. 针对`SafeDivide<complex<float>>`
+  
+  * 通过匹配类模板的泛化形式，可以知道我们要匹配的模板实参是`SafeDivide<complex<float>, true_type>`
+  
+  * 计算两个偏特化形式的匹配：A和B均得到`SafeDivide<complex<float>, false_type>`
+  
+  * A和B都与模板实参无法匹配，所以使用原型，调用`CustomDiv`
 
 ###3.2 后悔药：SFINAE
 ###3.3 实战单元：获得类型的属性——类型萃取（Type Traits） 
