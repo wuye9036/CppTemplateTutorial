@@ -1842,7 +1842,7 @@ template <> struct DoWork<int,    int> {};  // (3) 这是 int, int 类型的特�
 
 所幸模板参数也有一个和函数参数相同的特性：默认实参（Default Arguments）。只需要一个例子，你们就能看明白了（http://goo.gl/TtmcY9）：
 
-```C++
+``` C++
 template <typename T0, typename T1 = void> struct DoWork;
 
 template <typename T> struct DoWork<T> {};
@@ -2022,7 +2022,7 @@ void foo(){
 
 当然，这时也许你会注意到，`is_integral`，`is_floating_point`和其他类类型三者是互斥的，那能不能只使用一个条件量来进行分派呢？答案当然是可以的（ http://goo.gl/jYp5J2 ）：
 
-```C++
+``` C++
 #include <complex>
 #include <type_traits>
 
