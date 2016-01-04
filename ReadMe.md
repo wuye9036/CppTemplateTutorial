@@ -1720,19 +1720,38 @@ template <typename T> class X <T*> {};
 我们以`DoWork<int> i;`为例，尝试复原一下编译器完成整个模板匹配过程的场景，帮助大家理解。看以下示例代码：
 
 ```C++
-template <typename T> struct DoWork;	 // (0) 这是原型
+template <typename T> struct DoWork;	      // (0) 这是原型
 
-template <> struct DoWork<int> {};       // (1) 这是 int 类型的特化
-template <> struct DoWork<float> {};     // (2) 这是 float 类型的特化
+template <> struct DoWork<int> {};            // (1) 这是 int 类型的特化
+template <> struct DoWork<float> {};          // (2) 这是 float 类型的特化
+template <typename U> struct DoWork<U*> {};   // (3) 这是指针类型的偏特化
 
-DoWork<int> i; // (3)
+DoWork<int>    i;  // (4)
+DoWork<float*> pf; // (5)
 ```
 
-1. 编译器分析(0), (1), (2)三句，得知(0)是模板的原型，(1)，(2)两句是模板(0)匹配的特例。我们假设有两个字典，第一个字典存储了模板原型，我们称之为`TemplateDict`。第二个字典`TemplateSpecDict`，存储了模板原型所对应的特化/偏特化形式。所以编译器在这三句时，可以视作`TemplateDict.add(DoWork<T>)`，以及 `TemplateSpecDict.get(DoWork<T>).add(int);` 和 `TemplateSpecDict.get(DoWork<T>).add(float);`
+1. 编译器分析(0), (1), (2)三句，得知(0)是模板的原型，(1)，(2)，(3)是模板(0)的特化或偏特化。我们假设有两个字典，第一个字典存储了模板原型，我们称之为`TemplateDict`。第二个字典`TemplateSpecDict`，存储了模板原型所对应的特化/偏特化形式。所以编译器在这几句时，可以视作
 
-2. (3) 试图以`int`实例化类模板`DoWork`。它会在`TemplateDict`中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。
+```C++
+// 以下为伪代码
+TemplateDict[DoWork<T>] = {
+    DoWork<int>,
+    DoWork<float>,
+    DoWork<U*>                     
+};
+```
 
-3. 编译器这个时候就想了，那它会不会有针对`int`的特化呢？于是就去`TemplateSpecDict`中查找，发现果然有`DoWork<int>`的存在，就使用了这个特例。
+2. (4) 试图以`int`实例化类模板`DoWork`。它会在`TemplateDict`中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。(5) 中的`float*`也是同理。
+
+```C++
+// 以下为 DoWork<int> 查找对应匹配的伪代码
+templateProtoInt = TemplateDict.find(DoWork, int);    // 查找模板原型，查找到(0)
+template = templatePrototype.match(int);              // 以 int 对应 int 匹配到 (1)
+
+// 以下为DoWork<float*> 查找对应匹配的伪代码
+templateProtoIntPtr = TemplateDict.find(DoWork, float*) // 查找模板原型，查找到(0)
+template = templateProtoIntPtr.match(float*)            // 以 float* 对应 U* 匹配到 (3)，此时U为float
+```
 
 那么根据上面的步骤所展现的基本原理，我们随便来几个练习：
 
@@ -1765,11 +1784,27 @@ X<int*,    int>      v7;
 X<double*, double>   v8;
 ```
 
-在上面这段例子中，有几个值得注意之处。首先，偏特化时的模板参数，和原型的模板参数没有任何关系。和原型不同，它的顺序完全不影响模式匹配的顺序，它只是偏特化模式，如`<U, int>`中`U`的声明，真正的模式，是由`<U, int>`体现出来的。
+在上面这段例子中，有几个值得注意之处。首先，偏特化时的模板形参，和原型的模板形参没有任何关系。和原型不同，它的顺序完全不影响模式匹配的顺序，它只是偏特化模式，如`<U, int>`中`U`的声明，真正的模式，是由`<U, int>`体现出来的。
 
 这也是为什么在特化的时候，当所有类型都已经确定，我们就可以抛弃全部的模板参数，写出`template <> struct X<int, float>`这样的形式：因为所有列表中所有参数都确定了，就不需要额外的形式参数了。
 
-其次，作为一个模式匹配，偏特化的实参列表中展现出来的“样子”，就是它能被匹配的原因。比如，`struct X<T, T>`中，要求模板的两个参数必须是相同的类型。而`struct X<T, T*>`，则代表第二个模板类型参数必须是第一个模板类型参数的指针，比如`X<float***, float****>`就能匹配上。当然，除了简单的指针、`const`和`volatile`修饰符，其他的类模板也可以作为偏特化时的“模式”出现，例如示例8，它要求传入同一个类型的`unique_ptr`和`shared_ptr`。
+其次，作为一个模式匹配，偏特化的实参列表中展现出来的“样子”，就是它能被匹配的原因。比如，`struct X<T, T>`中，要求模板的两个参数必须是相同的类型。而`struct X<T, T*>`，则代表第二个模板类型参数必须是第一个模板类型参数的指针，比如`X<float***, float****>`就能匹配上。当然，除了简单的指针、`const`和`volatile`修饰符，其他的类模板也可以作为偏特化时的“模式”出现，例如示例8，它要求传入同一个类型的`unique_ptr`和`shared_ptr`。C++标准中指出下列模式都是可以被匹配的：
+
+> N3337, 14.8.2.5/8
+
+> 令`T`是模板类型实参或者类型列表（如 _int, float, double_  这样的，`TT`是template-template实参（参见6.2节），`i`是模板的非类型参数（整数、指针等），则以下形式的形参都会参与匹配：
+
+> `T`,`cv-list T`,`T*`, `_template-name_ <T>`, `T&`, `T&&`
+
+>`T [ _integer-constant_ ]`
+
+>`_type_ (T)`, `T()`, `T(T)`
+
+>`T _type_ ::*`, `_type_ T::*`, `T T::*`
+
+>`T (_type_ ::*)()`, `_type_ (T::*)()`, `_type_ (_type_ ::*)(T)`, `_type_ (T::*)(T)`, `T (_type_ ::*)(T)`, `T (T::*)()`, `T (T::*)(T)`
+
+>`_type_ [i]`, `_template-name_ <i>`, `TT<T>`, `TT<i>`, `TT<>`
 
 对于某些实例化，偏特化的选择并不是唯一的。比如v4的参数是`<float*, float*>`，能够匹配的就有三条规则，1，6和7。很显然，6还是比7好一些，因为能多匹配一个指针。但是1和6，就很难说清楚谁更好了。一个说明了两者类型相同；另外一个则说明了两者都是指针。所以在这里，编译器也没办法决定使用那个，只好爆出了编译器错误。
 
