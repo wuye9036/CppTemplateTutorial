@@ -1730,7 +1730,7 @@ DoWork<int>    i;  // (4)
 DoWork<float*> pf; // (5)
 ```
 
-1. 编译器分析(0), (1), (2)三句，得知(0)是模板的原型，(1)，(2)，(3)是模板(0)的特化或偏特化。我们假设有两个字典，第一个字典存储了模板原型，我们称之为`TemplateDict`。第二个字典`TemplateSpecDict`，存储了模板原型所对应的特化/偏特化形式。所以编译器在这几句时，可以视作
+首先，编译器分析(0), (1), (2)三句，得知(0)是模板的原型，(1)，(2)，(3)是模板(0)的特化或偏特化。我们假设有两个字典，第一个字典存储了模板原型，我们称之为`TemplateDict`。第二个字典`TemplateSpecDict`，存储了模板原型所对应的特化/偏特化形式。所以编译器在这几句时，可以视作
 
 ```C++
 // 以下为伪代码
@@ -1741,16 +1741,18 @@ TemplateDict[DoWork<T>] = {
 };
 ```
 
-2. (4) 试图以`int`实例化类模板`DoWork`。它会在`TemplateDict`中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。(5) 中的`float*`也是同理。
+然后 (4) 试图以`int`实例化类模板`DoWork`。它会在`TemplateDict`中，找到`DoWork`，它有一个形式参数`T`接受类型，正好和我们实例化的要求相符合。并且此时`T`被推导为`int`。(5) 中的`float*`也是同理。
 
 ```C++
-// 以下为 DoWork<int> 查找对应匹配的伪代码
-templateProtoInt = TemplateDict.find(DoWork, int);    // 查找模板原型，查找到(0)
-template = templatePrototype.match(int);              // 以 int 对应 int 匹配到 (1)
+{   // 以下为 DoWork<int> 查找对应匹配的伪代码
+    templateProtoInt = TemplateDict.find(DoWork, int);    // 查找模板原型，查找到(0)
+    template = templatePrototype.match(int);              // 以 int 对应 int 匹配到 (1)
+}
 
-// 以下为DoWork<float*> 查找对应匹配的伪代码
-templateProtoIntPtr = TemplateDict.find(DoWork, float*) // 查找模板原型，查找到(0)
-template = templateProtoIntPtr.match(float*)            // 以 float* 对应 U* 匹配到 (3)，此时U为float
+{   // 以下为DoWork<float*> 查找对应匹配的伪代码
+    templateProtoIntPtr = TemplateDict.find(DoWork, float*) // 查找模板原型，查找到(0)
+    template = templateProtoIntPtr.match(float*)            // 以 float* 对应 U* 匹配到 (3)，此时U为float
+}
 ```
 
 那么根据上面的步骤所展现的基本原理，我们随便来几个练习：
@@ -1794,17 +1796,17 @@ X<double*, double>   v8;
 
 > 令`T`是模板类型实参或者类型列表（如 _int, float, double_  这样的，`TT`是template-template实参（参见6.2节），`i`是模板的非类型参数（整数、指针等），则以下形式的形参都会参与匹配：
 
-> `T`,`cv-list T`,`T*`, `_template-name_ <T>`, `T&`, `T&&`
+> `T`,`cv-list T`,`T*`, `template-name <T>`, `T&`, `T&&`
 
->`T [ _integer-constant_ ]`
+>`T [ integer-constant ]`
 
->`_type_ (T)`, `T()`, `T(T)`
+>`type (T)`, `T()`, `T(T)`
 
->`T _type_ ::*`, `_type_ T::*`, `T T::*`
+>`T type ::*`, `type T::*`, `T T::*`
 
->`T (_type_ ::*)()`, `_type_ (T::*)()`, `_type_ (_type_ ::*)(T)`, `_type_ (T::*)(T)`, `T (_type_ ::*)(T)`, `T (T::*)()`, `T (T::*)(T)`
+>`T (type ::*)()`, `type (T::*)()`, `type (type ::*)(T)`, `type (T::*)(T)`, `T (type ::*)(T)`, `T (T::*)()`, `T (T::*)(T)`
 
->`_type_ [i]`, `_template-name_ <i>`, `TT<T>`, `TT<i>`, `TT<>`
+>`type [i]`, `template-name <i>`, `TT<T>`, `TT<i>`, `TT<>`
 
 对于某些实例化，偏特化的选择并不是唯一的。比如v4的参数是`<float*, float*>`，能够匹配的就有三条规则，1，6和7。很显然，6还是比7好一些，因为能多匹配一个指针。但是1和6，就很难说清楚谁更好了。一个说明了两者类型相同；另外一个则说明了两者都是指针。所以在这里，编译器也没办法决定使用那个，只好爆出了编译器错误。
 
@@ -1935,9 +1937,7 @@ template <typename... Ts, typename U> class Y<Ts..., U> {};    // (4) error!
 
 ```C++
 template <
-    typename T0,
-    typename T1 = void,
-    typename T2 = void
+    typename T0, typename T1 = void, typename T2 = void
 > class Tuple;
 ```
 
