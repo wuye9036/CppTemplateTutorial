@@ -1946,6 +1946,7 @@ template <
 对于浮点，执行内置除法；对于整数，要处理除零保护，防止引发异常；对于其他类型，执行一个叫做`CustomeDiv`的函数。
 
 第一步，我们先把浮点正确的写出来：
+
 ```C++
 #include <type_traits>
 
@@ -2022,7 +2023,7 @@ void foo(){
 
 当然，这时也许你会注意到，`is_integral`，`is_floating_point`和其他类类型三者是互斥的，那能不能只使用一个条件量来进行分派呢？答案当然是可以的（ http://goo.gl/jYp5J2 ）：
 
-``` C++
+```cpp
 #include <complex>
 #include <type_traits>
 
