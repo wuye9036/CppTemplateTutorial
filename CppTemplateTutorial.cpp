@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include <vector>
 #include <cstdint>
+#include <iostream>
 
 #define WRONG_CODE_ENABLED 0
 
@@ -751,6 +752,69 @@ namespace _4
 	ClassC<ClassB> a;
 	ClassF<ClassD, float> b;
 }
+
+// 4.1 
+namespace _4_1
+{
+        class A
+        {
+                static const int num = 2;
+        };
+
+        template<int i>
+                class State
+                {
+                        static const int num = State<i-1>::num + 1;
+                };
+        template<>
+                class State<0>
+                {
+                        static const int num = 0;
+                };
+}
+
+// 4.2
+namespace _4_2
+{
+        void doSomeThing(int num)
+        {
+                std::cout << num << std::endl;
+        }
+        template<int C>
+                void iterate()
+                {
+                        doSomeThing(C);
+                        iterate<C+1>();
+                }
+        template<>
+                void iterate<10>()
+                {
+                }
+}
+
+namespace _4_3
+{
+template<int i>
+        class Fib
+        {
+                static const long long num = 
+                        Fib<i-1>::num +
+                        Fib<i-2>::num;
+        };
+template<>
+        class Fib<1>
+        {
+                static const long long num = 1;
+        };
+template<>
+        class Fib<2>
+        {
+                static const long long num = 1;
+        };
+static_assert(Fib<5>::num == 5);
+}
+                                
+
 
 // 5.1 How to Construct Meta Operators
 namespace _5_1

@@ -2530,8 +2530,145 @@ void foo(
 
 ## 4   用模板写程序吧！骚年！
 ###4.1 模板上的递归
+从基础知识来说，递归包含了2个部分：
+ - 递归关系，即一个调用如何被转化为更低层次的调用
+ - 终止条件，否则递归永远不会终止
+
+模板元编程中很重要的一点就是类型即值，因为我们可以在一个类中存放一个静态成员变量，所以类中就可以存储值：
+
+```cpp
+class A
+{
+        static const int num = 2;
+};
+```
+
+在上面这个例子中，`A::num`就表现得像一个普通的变量一样。同样的，我们也可以定义一个同样具有num成员的类`B`，从而使得`A::num` 和 `B::num`表现得像两个完全相同的变量一样。
+
+注意，这里的`num`变量必须要定义成const，因为只有这样C++编译器才会认为它们是编译期可知的。从而利用更低层次的、编译期可知的值来来计算当前状态时的值。但编译期可知的值（即常量表达式）不只是const，具体可以参阅http://en.cppreference.com/w/cpp/language/constant_expression 中的相关信息。
+
+有了以上的知识，我们不难发现，在模板元编程中，递归的两个部分分别对应了模板中的递归实例化与模板的特化:
+
+```cpp
+template<int i>
+    class State
+{
+        static const int num = State<i-1> + 1;
+}; // 递归关系
+
+template<>
+    class State<0>
+{
+        static const int num = 0;
+}; // 终止条件
+```
+
+利用这些技巧，我们可以很轻松地写出模板化的递归函数。
+
 ###4.2 将循环变成递归，将分支变成递归，将一切变成递归
+一个循环可以被看作一类特殊形式的递归：
+```cpp
+for(int i=0; i<N; ++i)
+        doSomeThing(i); 
+
+// 等价于
+void f(int num)
+{
+        if (num == N) return; //终止条件
+        doSomeThing(num);
+        f(num+1); // 递归关系
+}
+f(0);
+```
+因此，很容易就能写出其递归形式
+
+```cpp
+template<int C>
+void iterate()
+{
+        doSomeThing(C);
+        iterate<C+1>();
+}
+
+template<>
+void iterate<10>()
+{
+}
+iterate<0>();
+```
+
+这段代码等价于
+```cpp
+doSomeThing(0);
+//...
+doSomething(9);
+```
+在实际应用中，这种写法主要是为了在循环次数编译期已知的情况下，手动展开循环以提升性能。当然也有一些编译期算法库使用了这一技术。
+
+同样的，条件语句也可以这样实现：
+```cpp
+template<bool C>
+void if_statement(); //先要声明函数模板
+
+template<>
+void if_statement<true>()
+{
+    //在true时执行的代码
+}
+
+template<>
+void if_statement<false>()
+{
+	//在false时执行的代码
+}
+
+if_statement< 2==3 >(); //执行了if_statement<false>()
+```
+
+以上例子表明，传统的C like语言中的if、for等语句，在C++的模板元中都有对应的替代品，只需要注意的是模板参数必须要能在编译期推导出来。在上例中如果调用`if_statement< i == 2 >()` (i是一个`int`类型变量)，就会报错。因为模板元是编译期的产物。
+
+提示：
+如果将上述的循环代码从循环10次改成循环10000次，那么大多数编译器都会报编译错误，这是因为模板实例化的层数是有限的。实际中一般应该避免产生如此巨大的模板，因为它会显著拖慢编译时间。
+```
+//Clang 3.7报错
+fatal error: recursive template instantiation exceeded maximum depth of 256
+||         iteration<C+1>();
+```
+
+
 ###4.3 实战单元：元编程的Fibonacci数列
+有了以上的基础知识，Fibonacci数列的推导应该不是什么难事。回忆一下斐波那契数列的定义：
+```
+fib(n) =
+         1,                   当n==1或n==2时
+         fib(n-1) + fib(n-2), 当n>2时
+```
+
+我们利用`fib<n>::num`的形式来存储着第n项的值，这样不同的n下的`fib<n>`就相当于一个个值：
+```cpp
+template<int i>
+        class Fib
+        {
+                static const long long num = 
+                        Fib<i-1>::num +
+                        Fib<i-2>::num;
+        };
+template<>
+        class Fib<1>
+        {
+                static const long long num = 1;
+        };
+template<>
+        class Fib<2>
+        {
+                static const long long num = 1;
+        };
+static_assert(Fib<5>::num == 5);
+```
+
+值得注意的是，因为每一个`fib<n>`类都只会被实例化一次，因此只有在第一次实例化fib<n>的时候才会发生递归调用，其它时候会直接读取计算好的值。
+
+比起之前的函数原始写法，模板元编程中类的成员变量具有记忆性，这样的写法大大降低了时间复杂度。
 
 ## 5   元编程下的数据结构与算法
 ###5.1 获得类型的属性——类型萃取（Type Traits） 
