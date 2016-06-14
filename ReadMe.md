@@ -2528,42 +2528,36 @@ void foo(
 
 虽然它写起来并不直观，但是对于既没有编译器自省、也没有Concept的C++1y来说，已经是最好的选择了。
 
-## 4   用模板写程序吧！骚年！
-###4.1 模板上的递归
-###4.2 将循环变成递归，将分支变成递归，将一切变成递归
-###4.3 实战单元：元编程的Fibonacci数列
-
-## 5   元编程下的数据结构与算法
-###5.1 获得类型的属性——类型萃取（Type Traits） 
-###5.2 列表与数组
-###5.3 字典结构
-###5.4 “快速”排序
-###5.5 其它常用的“轮子”
+## 4 元编程下的数据结构与算法
+###4.1 表达式与数值计算
+###4.1 获得类型的属性——类型萃取（Type Traits） 
+###4.2 列表与数组
+###4.3 字典结构
+###4.4 “快速”排序
+###4.5 其它常用的“轮子”
 boost.hana
 
-## 6   模板的进阶技巧
-###6.1 嵌入类
-###6.2 Template-Template Class
-###6.3 高阶函数
-###6.4 闭包：模板的“基于对象”
+## 5 模板的进阶技巧
+###5.1 嵌入类
+###5.2 Template-Template Class
+###5.3 高阶函数
+###5.4 闭包：模板的“基于对象”
 stl allocator?
 mpl::apply
-###6.5 占位符(placeholder)：在C++中实现方言的基石
-###6.6 编译期“多态”
+###5.5 占位符(placeholder)：在C++中实现方言的基石
+###5.6 编译期“多态”
 
-## 7   模板的威力：从foreach, transform到Linq
-###7.1 Foreach与Transform
-###7.2 Boost中的模板
+## 6   模板的威力：从foreach, transform到Linq
+###6.1 Foreach与Transform
+###6.2 Boost中的模板
 Any Spirit Hana
-###7.3 Reactor、Linq与C++中的实践
-###7.4 更高更快更强：从Linq到FP
+###6.3 Reactor、Linq与C++中的实践
+###6.4 更高更快更强：从Linq到FP
 
-## 8   结语：讨论有益，争端无用
-###8.1 更好的编译器，更友善的出错信息
-###8.2 模板的症结：易于实现，难于完美
-
+## 7   结语：讨论有益，争端无用
+###7.1 更好的编译器，更友善的出错信息
+###7.2 模板的症结：易于实现，难于完美
 alexandrescu 关于 min max 的讨论：《再谈Min和Max》
-
 std::experimental::any / boost.any 对于 reference 的处理
 
   [1]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf
