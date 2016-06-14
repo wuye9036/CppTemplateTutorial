@@ -1469,8 +1469,8 @@ template <typename T> struct Y
 };
 
 void poo(){
-    X<int>::foo();
-    X<float>::foo();
+    Y<int>::foo();
+    Y<float>::foo();
 }
 ```
 
