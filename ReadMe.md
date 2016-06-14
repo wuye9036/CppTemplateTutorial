@@ -729,7 +729,7 @@ Variant addFloatOrMulInt(Variant const* a, Variant const* b)
 更常见的是 `void*`:
 
 ``` C++
-#define BIN_OP(type, a, op, b, result) (*(type const *)(result)) = (*(type const *)(a)) op (*(type const*)(b))
+#define BIN_OP(type, a, op, b, result) (*(type *)(result)) = (*(type const *)(a)) op (*(type const*)(b))
 void doDiv(void* out, void const* data0, void const* data1, DATA_TYPE type)
 {
 	if(type == TYPE_INT)
@@ -1030,9 +1030,9 @@ void PrintID()
 // TypeToID 的模板“原型”
 // ...
 
-template <typename T> class TypeToID<float>
+template <> class TypeToID<float>
 {
-	static int const ID = 0xF10A7;
+  static int const ID = 0xF10A7;
 };
 ```
 
@@ -1041,12 +1041,12 @@ template <typename T> class TypeToID<float>
 ``` C++
 template <> class TypeToID<void*>
 {
-	static int const ID = 0x401d;
+  static int const ID = 0x401d;
 };
 
 void PrintID()
 {
-	cout << "ID of uint8_t: " << TypeToID<void*>::ID << endl;
+  cout << "ID of uint8_t: " << TypeToID<void*>::ID << endl;
 }
 ```
 
