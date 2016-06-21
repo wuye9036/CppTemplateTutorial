@@ -2519,7 +2519,7 @@ template <typename ArgT>
 void foo(
   ArgT&& a, 
   typename std::enabled_if<
-    is_same<ArgT, float>::value
+    is_same<std::decay_t<ArgT>, float>::value
   >::type* = nullptr
 );
 ```
