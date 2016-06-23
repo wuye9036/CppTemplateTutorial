@@ -1,4 +1,4 @@
-﻿
+
 #  C++ Template 进阶指南
 
 ## 0. 前言
@@ -47,7 +47,7 @@ C++编译器众多，且对模板的支持可能存在细微差别。如果没�
 * Visual Studio 2015
 * GCC 4.9.2 (x86)
 
-此外，部分复杂实例我们还在文中提供了在线的编译器预览以方便大家阅读和测试。在线编译器参见： http://gcc.godbolt.org/ 。
+此外，部分复杂实例我们还在文中提供了在线的编译器预览以方便大家阅读和测试。在线编译器参见： [`gcc.godbolt.org`](http://gcc.godbolt.org/)。
 
 ###0.5 体例
 
@@ -1694,7 +1694,7 @@ void f(){
 }
 ```
 
-这个例子在字面上“看起来”并没有什么问题，可惜编译器在编译的时候仍然提示出错了（http://goo.gl/zI42Zv）：
+这个例子在字面上“看起来”并没有什么问题，可惜编译器在编译的时候仍然提示出错了[`goo.gl/zI42Zv`](http://goo.gl/zI42Zv)：
 
 ```
 5 : error: too many template arguments for class template 'DoWork'
@@ -1810,7 +1810,7 @@ X<double*, double>   v8;
 
 对于某些实例化，偏特化的选择并不是唯一的。比如v4的参数是`<float*, float*>`，能够匹配的就有三条规则，1，6和7。很显然，6还是比7好一些，因为能多匹配一个指针。但是1和6，就很难说清楚谁更好了。一个说明了两者类型相同；另外一个则说明了两者都是指针。所以在这里，编译器也没办法决定使用那个，只好爆出了编译器错误。
 
-其他的示例可以先自己推测一下， 再去编译器上尝试一番 (http://goo.gl/9UVzje)。
+其他的示例可以先自己推测一下， 再去编译器上尝试一番：[`goo.gl/9UVzje`](http://goo.gl/9UVzje)。
 
 #### 3.1.2 不定长的模板参数
 
@@ -1842,7 +1842,7 @@ template <> struct DoWork<int,    int> {};  // (3) 这是 int, int 类型的特�
 
 显而易见这个解决方案并不那么完美。首先，不管是偏特化还是用户实例化模板的时候，都需要多撰写好几个`void`，而且最长的那个参数越长，需要写的就越多；其次，如果我们的`DoWork`在程序维护的过程中新加入了一个参数列表更长的实例，那么最悲惨的事情就会发生 —— 原型、每一个偏特化、每一个实例化都要追加上`void`以凑齐新出现的实例所需要的参数数量。
 
-所幸模板参数也有一个和函数参数相同的特性：默认实参（Default Arguments）。只需要一个例子，你们就能看明白了（http://goo.gl/TtmcY9）：
+所幸模板参数也有一个和函数参数相同的特性：默认实参（Default Arguments）。只需要一个例子，你们就能看明白了[`goo.gl/TtmcY9`](http://goo.gl/TtmcY9)：
 
 ``` C++
 template <typename T0, typename T1 = void> struct DoWork;
@@ -1885,7 +1885,7 @@ void foo(){
 
 不过不管怎么说，以长参数加默认参数的方式支持变长参数是可行的做法，这也是C++98/03时代的唯一选择。
 
-例如，[Boost.Tuple](https://github.com/boostorg/tuple/blob/develop/include/boost/tuple/detail/tuple_basic.hpp)就使用了这个方法，支持了变长的Tuple：
+例如，[`Boost.Tuple`](https://github.com/boostorg/tuple/blob/develop/include/boost/tuple/detail/tuple_basic.hpp)就使用了这个方法，支持了变长的Tuple：
 
 ```C++
 // Tuple 的声明，来自 boost
@@ -1980,7 +1980,7 @@ void foo(){
 
 在实例化的时候，尽管我们只为`SafeDivide`指定了参数`T`，但是它的另一个参数`IsFloat`在缺省的情况下，可以根据`T`，求出表达式`std::is_floating_point<T>::value`的值作为实参的值，带入到`SafeDivide`的匹配中。
 
-嗯，这个时候我们要再把整型和其他类型纳入进来，无外乎就是加这么一个参数（ http://goo.gl/0Lqywt ）：
+嗯，这个时候我们要再把整型和其他类型纳入进来，无外乎就是加这么一个参数[`goo.gl/0Lqywt`](http://goo.gl/0Lqywt)：
 
 ```C++
 #include <complex>
@@ -2021,7 +2021,7 @@ void foo(){
 }
 ```
 
-当然，这时也许你会注意到，`is_integral`，`is_floating_point`和其他类类型三者是互斥的，那能不能只使用一个条件量来进行分派呢？答案当然是可以的（ http://goo.gl/jYp5J2 ）：
+当然，这时也许你会注意到，`is_integral`，`is_floating_point`和其他类类型三者是互斥的，那能不能只使用一个条件量来进行分派呢？答案当然是可以的：[`goo.gl/jYp5J2`](http://goo.gl/jYp5J2)：
 
 ```cpp
 #include <complex>
@@ -2227,7 +2227,7 @@ void callFoo() {
   
   * 什么样的行为不可以被称作 Substitution Failure —— 他们叫SFINAE error。
   
-我们在此不再详述，有兴趣的同学可以参照 http://en.cppreference.com/w/cpp/language/sfinae  ，这是标准的一个精炼版本。这里我们简单的解释一下。
+我们在此不再详述，有兴趣的同学可以参照[`这里`](http://en.cppreference.com/w/cpp/language/sfinae)，这是标准的一个精炼版本。这里我们简单的解释一下。
 
 考虑我们有这么个函数签名：
 
