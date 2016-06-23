@@ -1694,7 +1694,7 @@ void f(){
 }
 ```
 
-这个例子在字面上“看起来”并没有什么问题，可惜编译器在编译的时候仍然提示出错了（http://goo.gl/zI42Zv）：
+这个例子在字面上“看起来”并没有什么问题，可惜编译器在编译的时候仍然提示出错了（ http://goo.gl/zI42Zv ）：
 
 ```
 5 : error: too many template arguments for class template 'DoWork'
