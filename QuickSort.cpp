@@ -78,6 +78,7 @@ void StaticTest()
 	typedef to_int_types<1, 2, 3>::type lst_1_3;
 	typedef to_int_types<3, 2, 1>::type lst_3_1;
 	typedef to_int_types<3, 7, 1, 6, 5, 22, 5>::type lst;
+	typedef to_int_types<1, 3, 5, 5, 6, 7, 22>::type sorted_lst;
 
 	typedef integral_constant<int, 1>::type i1;
 	typedef integral_constant<int, 2>::type i2;
@@ -101,4 +102,5 @@ void StaticTest()
 	static_assert(is_same<QuickSort<lst_3_1  >::type, lst_1_3>::value, "");
 	static_assert(is_same<QuickSort<tuple<>  >::type, tuple<>>::value, "");
 	static_assert(is_same<QuickSort<tuple<i1>>::type, tuple<i1>>::value, "");
+	static_assert(is_same<QuickSort<lst      >::type, sorted_lst>::value, "");
 }
