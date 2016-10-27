@@ -44,10 +44,16 @@ C++之所以变成一门层次丰富、结构多变、语法繁冗的语言，�
 C++编译器众多，且对模板的支持可能存在细微差别。如果没有特别强调，本书行文过程中，使用了下列编译器来测试文中提供的代码和示例：
 
 * Clang 3.7 (x86)
-* Visual Studio 2015
-* GCC 4.9.2 (x86)
+* Visual Studio 2015 Update 3
+* GCC 7 (x86, snapshot)
 
-此外，部分复杂实例我们还在文中提供了在线的编译器预览以方便大家阅读和测试。在线编译器参见： [`gcc.godbolt.org`](http://gcc.godbolt.org/)。
+此外，部分复杂实例我们还在文中提供了在线的编译器预览以方便大家阅读和测试。在线编译器参见： [`gcc.godbolt.org`](https://gcc.godbolt.org/)。
+
+一些示例中用到的特性所对应的C++标准：
+
+|特性|标准|
+|---|---|
+| std::decay_t<T> | C++ 14 |
 
 ###0.5 体例
 
@@ -2420,6 +2426,7 @@ void doSomething() {
 
 所以这个时候，就能看到 `enable_if` 是如何通过 SFINAE 发挥威力的了：
 
+
 ```C++
 #include <type_traits>
 #include <utility>
@@ -2528,6 +2535,8 @@ void foo(
 
 虽然它写起来并不直观，但是对于既没有编译器自省、也没有Concept的C++1y来说，已经是最好的选择了。
 
+（补充例子：构造函数上的enable_if）
+
 ## 4 元编程下的数据结构与算法
 ###4.1 表达式与数值计算
 ###4.1 获得类型的属性——类型萃取（Type Traits） 
@@ -2535,7 +2544,6 @@ void foo(
 ###4.3 字典结构
 ###4.4 “快速”排序
 ###4.5 其它常用的“轮子”
-boost.hana
 
 ## 5 模板的进阶技巧
 ###5.1 嵌入类
@@ -2550,13 +2558,14 @@ mpl::apply
 ## 6   模板的威力：从foreach, transform到Linq
 ###6.1 Foreach与Transform
 ###6.2 Boost中的模板
-Any Spirit Hana
+Any Spirit Hana TypeErasure
 ###6.3 Reactor、Linq与C++中的实践
 ###6.4 更高更快更强：从Linq到FP
 
 ## 7   结语：讨论有益，争端无用
 ###7.1 更好的编译器，更友善的出错信息
 ###7.2 模板的症结：易于实现，难于完美
+###7.3 一些期望
 alexandrescu 关于 min max 的讨论：《再谈Min和Max》
 std::experimental::any / boost.any 对于 reference 的处理
 
