@@ -1,9 +1,9 @@
 
-#  C++ Template 进阶指南
+# C++ Template 进阶指南
 
 ## 0. 前言
 
-###0.1 C++另类简介：比你用的复杂，但比你想的简单
+### 0.1 C++另类简介：比你用的复杂，但比你想的简单
 
 C++似乎从他为世人所知的那天开始便成为天然的话题性编程语言。在它在周围有着形形色色的赞美与贬低之词。当我在微博上透露欲写此文的意愿时，也收到了很多褒贬不一的评论。作为一门语言，能拥有这么多使用并恨着它、使用并畏惧它的用户，也算是语言丛林里的奇观了。
 
@@ -21,7 +21,7 @@ C++之所以变成一门层次丰富、结构多变、语法繁冗的语言，�
 
 本文的写作初衷，就是通过“编程语言”的视角，介绍一个简单、清晰的“模板语言”。我会尽可能的将模板的诸多要素连串起来，用一些简单的例子帮助读者学习这门“语言”，让读者在编写、阅读模板代码的时候，能像 `if(exp) { dosomething(); }`一样的信手拈来，让“模板元编程”技术成为读者牢固掌握、可举一反三的有用技能。
 
-###0.2 适宜读者群
+### 0.2 适宜读者群
 
 因为本文并不是用于C++入门，例子中也多少会牵涉一些其它知识，因此如果读者能够具备以下条件，会读起来更加轻松：
 
@@ -33,13 +33,13 @@ C++之所以变成一门层次丰富、结构多变、语法繁冗的语言，�
 
 诚如上节所述，本文并不是《C++ Templates》的简单重复，与《Modern C++ Design》交叠更少。从知识结构上，我建议大家可以先读本文，再阅读《C++ Templates》获取更丰富的语法与实现细节，以更进一步；《Modern C++ Design》除了元编程之外，还有很多的泛型编程示例，原则上泛型编程的部分与我所述的内容交叉不大，读者在读完1-3章了解模板的基本规则之后便可阅读《MCD》的相应章节；元编程部分（如Typelist）建议在阅读完本文之后再行阅读，或许会更易理解。
 
-###0.3 版权
+### 0.3 版权
 
 本文是随写随即同步到Github上，因此在行文中难免会遗漏引用。本文绝大部分内容应是直接承出我笔，但是也不定会有他山之石。所有指涉内容我会尽量以引号框记，或在上下文和边角注记中标示，如有遗漏烦请不吝指出。
 
 全文所有为我所撰写的部分，作者均保留所有版权。如果有需要转帖或引用，还请注明出处并告知于我。
 
-###0.4 推荐编译环境
+### 0.4 推荐编译环境
 
 C++编译器众多，且对模板的支持可能存在细微差别。如果没有特别强调，本书行文过程中，使用了下列编译器来测试文中提供的代码和示例：
 
@@ -55,9 +55,9 @@ C++编译器众多，且对模板的支持可能存在细微差别。如果没�
 |---|---|
 | std::decay_t<T> | C++ 14 |
 
-###0.5 体例
+### 0.5 体例
 
-####0.5.1 示例代码
+#### 0.5.1 示例代码
 
 ```C++
 void SampleCode() {
@@ -65,7 +65,7 @@ void SampleCode() {
 }
 ```
 
-####0.5.2 引用
+#### 0.5.2 引用
 
 引用自C++标准：
 
@@ -76,7 +76,7 @@ void SampleCode() {
 > 《书名》
 > 这是一段引用或翻译自其他图书的文字
 
-###0.6 意见、建议、喷、补遗、写作计划
+### 0.6 意见、建议、喷、补遗、写作计划
 
 * 需增加：
   * 模板的使用动机。
@@ -88,9 +88,9 @@ void SampleCode() {
 
 ## 1. Template的基本语法
 
-###1.1 Template Class基本语法
+### 1.1 Template Class基本语法
 
-####1.1.1 Template Class的与成员变量定义
+#### 1.1.1 Template Class的与成员变量定义
 我们来回顾一下最基本的Template Class声明和定义形式：
 
 Template Class声明：
@@ -127,7 +127,7 @@ typedef class {
 
 可以看出，通过模板参数替换类型，可以获得很多形式相同的新类型，有效减少了代码量。这种用法，我们称之为“泛型”（Generic Programming），它最常见的应用，即是STL中的容器模板类。
 
-####1.1.2 模板的使用
+#### 1.1.2 模板的使用
 
 对于C++来说，类型最重要的作用之一就是用它去产生一个变量。例如我们定义了一个动态数组（列表）的模板类`vector`，它对于任意的元素类型都具有push_back和clear的操作，我们便可以如下定义这个类：
 
@@ -178,7 +178,7 @@ ClassA<double>
 
 template <typename T0, typename T1> class ClassB
 {
-	// Class body ...
+    // Class body ...
 };
 
 ClassB<int, float>
@@ -187,7 +187,7 @@ ClassB<int, float>
 当然，在实例化过程中，被绑定到模板参数上的类型（即模板实参）需要与模板形参正确匹配。
 就如同函数一样，如果没有提供足够并匹配的参数，模板便不能正确的实例化。
  
-####1.1.3 模板类的成员函数定义
+#### 1.1.3 模板类的成员函数定义
 
 由于C++11正式废弃“模板导出”这一特性，因此在模板类的变量在调用成员函数的时候，需要看到完整的成员函数定义。因此现在的模板类中的成员函数，通常都是以内联的方式实现。
 例如：
@@ -197,13 +197,13 @@ template <typename T>
 class vector
 {
 public:
-	void clear()
-	{
-		// Function body
-	}
+    void clear()
+    {
+        // Function body
+    }
 	
 private:
-	T* elements;
+    T* elements;
 };
 ```
 
@@ -214,9 +214,9 @@ template <typename T>
 class vector
 {
 public:
-	void clear();			// 注意这里只有声明
+    void clear(); // 注意这里只有声明
 private:
-	T* elements;
+    T* elements;
 };
 
 template <typename T>
@@ -231,7 +231,7 @@ void vector<T>::clear()		// 函数的实现放在这里
 ``` C++
 void vector::clear()
 {
-	// Function body
+    // Function body
 }
 ```
 
@@ -243,16 +243,16 @@ void vector::clear()
 综上，正确的成员函数实现如下所示：
 
 ``` C++
-template <typename T>		// 模板参数
-void vector<T> /*看起来像偏特化*/ ::clear()		// 函数的实现放在这里
+template <typename T> // 模板参数
+void vector<T> /*看起来像偏特化*/ ::clear() // 函数的实现放在这里
 {
-	// Function body
+    // Function body
 }
 ```
 
-###1.2 Template Function的基本语法
+### 1.2 Template Function的基本语法
 
-####1.2.1 Template Function的声明和定义
+#### 1.2.1 Template Function的声明和定义
 
 模板函数的语法与模板类基本相同，也是以关键字`template`和模板参数列表作为声明与定义的开始。模板参数列表中的类型，可以出现在参数、返回值以及函数体中。比方说下面几个例子
 
@@ -265,8 +265,8 @@ template <typename T, typename U> U foo(T const&);
 
 template <typename T> void foo()
 {
-	T var;
-	// ...
+    T var;
+    // ...
 }
 ```
 
@@ -316,14 +316,14 @@ template <typename T> void foo()
 
 当然和“设计模式”一样，模板在实际应用中，也会有一些固定的需求和解决方案。比较常见的场景包括：泛型（最基本的用法）、通过类型获得相应的信息（型别萃取）、编译期间的计算、类型间的推导和变换（从一个类型变换成另外一个类型，比如boost::function）。这些本文在以后的章节中会陆续介绍。
 
-####1.2.2 模板函数的使用
+#### 1.2.2 模板函数的使用
 
 我们先来看一个简单的函数模板，两个数相加：
 
 ``` C++
 template <typename T> T Add(T a, T b)
 {
-	return a + b;
+    return a + b;
 }
 ```
 
@@ -399,7 +399,7 @@ float data[1024];
 
 template <typename T> T GetValue(int i)
 {
-	return static_cast<T>(data[i]);
+    return static_cast<T>(data[i]);
 }
 
 float a = GetValue(0);	// 出错了！
@@ -428,7 +428,7 @@ DstT dest = c_style_cast<DstT>(src);
 ``` C++
 template <typename SrcT, typename DstT> DstT c_style_cast(SrcT v)
 {
-	return (DstT)(v);
+    return (DstT)(v);
 }
 
 int v = 0;
@@ -456,14 +456,14 @@ float i = c_style_cast<int, float>(v);
 ``` C++
 template <typename DstT, typename SrcT> DstT c_style_cast(SrcT v)	// 模版参数 DstT 需要人肉指定，放前面。
 {
-	return (DstT)(v);
+    return (DstT)(v);
 }
 
 int v = 0;
 float i = c_style_cast<float>(v);  // 形象地说，DstT会先把你指定的参数吃掉，剩下的就交给编译器从函数参数列表中推导啦。
 ```
 
-###1.3 整型也可是Template参数
+### 1.3 整型也可是Template参数
 
 模板参数除了类型外（包括基本类型、结构、类类型等），也可以是一个整型数（Integral Number）。这里的整型数比较宽泛，包括布尔、不同位数、有无符号的整型，甚至包括指针。我们将整型的模板参数和类型作为模板参数来做一个对比：
 
@@ -479,7 +479,7 @@ template <int      V> class TemplateWithValue;
 ``` C++
 template <typename T, int Size> struct Array
 {
-	T data[Size];
+    T data[Size];
 };
 
 Array<int, 16> arr;
@@ -490,7 +490,7 @@ Array<int, 16> arr;
 ``` C++
 class IntArrayWithSize16
 {
-	int data[16];			// int 替换了 T, 16 替换了 Size
+    int data[16]; // int 替换了 T, 16 替换了 Size
 };
 
 IntArrayWithSize16 arr;
@@ -503,9 +503,9 @@ template <int i> class A {};
 
 void foo()
 {
-	int x = 3;
-	A<5> a;			// 正确！
-	A<x> b;			// error C2971: '_1_3::A' : template parameter 'i' : 'x' : a local variable cannot be used as a non-type argument
+    int x = 3;
+    A<5> a; // 正确！
+    A<x> b; // error C2971: '_1_3::A' : template parameter 'i' : 'x' : a local variable cannot be used as a non-type argument
 }
 ```
 因为x不是一个编译期常量，所以 `A<x>` 就会告诉你，x是一个局部变量，不能作为一个模板参数出现。
@@ -516,9 +516,9 @@ void foo()
 template <int i> class A 
 {
 public:
-	void foo(int)
-	{
-	}
+    void foo(int)
+    {
+    }
 };
 template <uint8_t a, typename b, void* c> class B {};
 template <bool, void (*a)()> class C {};
@@ -526,33 +526,31 @@ template <void (A<3>::*a)(int)> class D {};
 
 template <int i> int Add(int a)	// 当然也能用于函数模板
 {
-	return a + i;
+    return a + i;
 }
 
 void foo()
 {
-	A<5> a;
-	B<
-		7, A<5>, nullptr
-	>				b;	// 模板参数可以是一个无符号八位整数，可以是模板生成的类；可以是一个指针。
-	C<false, &foo>  c;	// 模板参数可以是一个bool类型的常量，甚至可以是一个函数指针。
-	D<&A<3>::foo>   d;	// 丧心病狂啊！它还能是一个成员函数指针！
-	int x = Add<3>(5);	// x == 8。因为整型模板参数无法从函数参数获得，所以只能是手工指定啦。
+    A<5> a;
+    B<7, A<5>, nullptr>	b; // 模板参数可以是一个无符号八位整数，可以是模板生成的类；可以是一个指针。
+    C<false, &foo> c; // 模板参数可以是一个bool类型的常量，甚至可以是一个函数指针。
+    D<&A<3>::foo> d; // 丧心病狂啊！它还能是一个成员函数指针！
+    int x = Add<3>(5); // x == 8。因为整型模板参数无法从函数参数获得，所以只能是手工指定啦。
 }
 
-template <float a> class E {};		// ERROR: 别闹！早说过只能是整数类型的啦！
+template <float a> class E {}; // ERROR: 别闹！早说过只能是整数类型的啦！
 ```
 
 当然，除了单纯的用作常数之外，整型参数还有一些其它的用途。这些“其它”用途最重要的一点是让类型也可以像整数一样运算。《Modern C++ Design》给我们展示了很多这方面的例子。不过你不用急着去阅读那本天书，我们会在做好足够的知识铺垫后，让你轻松学会这些招数。
 
-###1.4 模板形式与功能是统一的
+### 1.4 模板形式与功能是统一的
 
 第一章走马观花的带着大家复习了一下C++ Template的基本语法形式，也解释了包括 `typename` 在内，类/函数模板写法中各个语法元素的含义。形式是功能的外在体现，介绍它们也是为了让大家能理解到，模板之所以写成这种形式是有必要的，而不是语言的垃圾成分。
 
 从下一章开始，我们便进入了更加复杂和丰富的世界：讨论模板的匹配规则。其中有令人望而生畏的特化与偏特化。但是，请相信我们在序言中所提到的：将模板作为一门语言来看待，它会变得有趣而简单。
 
 ## 2.  模板元编程基础
-###2.1 编程，元编程，模板元编程
+### 2.1 编程，元编程，模板元编程
 
 技术的学习是一个登山的过程。第一章是最为平坦的山脚道路。而从这一章开始，则是正式的爬坡。无论是我写作还是你阅读，都需要付出比第一章更多的代价。那么问题就是，付出更多的精力学习模板是否值得？
 
@@ -699,35 +697,35 @@ for(v4a, v4b : vectorsA, vectorsB)
 
 好吧，我承认这个例子还是太牵强了。不过相信我，在你阅读完第二章和第三章之后，你会将这些特性自如地运用到你的程序之中。你的程序将会变成体现模板“可运算”威力的最好例子。
 
-###2.2 模板世界的If-Then-Else：类模板的特化与偏特化
+### 2.2 模板世界的If-Then-Else：类模板的特化与偏特化
 
-####2.2.1 根据类型执行代码
+#### 2.2.1 根据类型执行代码
 前一节的示例提出了一个要求：需要做出根据类型执行不同代码。要达成这一目的，模板并不是唯一的途径。比如之前我们所说的重载。如果把眼界放宽一些，虚函数也是根据类型执行代码的例子。此外，在C语言时代，也会有一些技法来达到这个目的，比如下面这个例子，我们需要对两个浮点做加法， 或者对两个整数做乘法：
 
 ``` C
 struct Variant
 {
-	union
-	{
-		int x;
-		float y;
-	} data;
-	uint32 typeId;
+    union
+    {
+        int x;
+        float y;
+    } data;
+    uint32 typeId;
 };
 
 Variant addFloatOrMulInt(Variant const* a, Variant const* b)
 {
-	Variant ret;
-	assert(a->typeId == b->typeId);
-	if (a->typeId == TYPE_INT)
-	{
-		ret.x = a->x * b->x;
-	}
-	else
-	{
-		ret.y = a->y + b->y;
-	}
-	return ret;
+    Variant ret;
+    assert(a->typeId == b->typeId);
+    if (a->typeId == TYPE_INT)
+    {
+        ret.x = a->x * b->x;
+    }
+    else
+    {
+        ret.y = a->y + b->y;
+    }
+    return ret;
 }
 
 ```
@@ -738,14 +736,14 @@ Variant addFloatOrMulInt(Variant const* a, Variant const* b)
 #define BIN_OP(type, a, op, b, result) (*(type *)(result)) = (*(type const *)(a)) op (*(type const*)(b))
 void doDiv(void* out, void const* data0, void const* data1, DATA_TYPE type)
 {
-	if(type == TYPE_INT)
-	{
-		BIN_OP(int, data0, *, data1, out);
-	}
-	else
-	{
-		BIN_OP(float, data0, +, data1, out);
-	}
+    if(type == TYPE_INT)
+    {
+        BIN_OP(int, data0, *, data1, out);
+    }
+    else
+    {
+        BIN_OP(float, data0, +, data1, out);
+    }
 }
 ```
 
@@ -757,12 +755,12 @@ IAnimal* animal = GetAnimalFromSystem();
 IDog* maybeDog = dynamic_cast<IDog*>(animal);
 if(maybeDog)
 {
-	maybeDog->Wangwang();
+    maybeDog->Wangwang();
 }
 ICat* maybeCat = dynamic_cast<ICat*>(animal);
 if(maybeCat)
 {
-	maybeCat->Moemoe();
+    maybeCat->Moemoe();
 }
 ```
 
@@ -781,15 +779,13 @@ template <typename T> T addFloatOrMulInt(T a, T b);
 如果你运用了模板来实现，那么当传入两个不同类型的变量，或者不是 `int` 和 `float` 变量，编译器就会提示错误。但是如果使用了我们前述的 `Variant` 来实现，编译器可就管不了那么多了。但是，成也编译期，败也编译期。最严重的“缺点”，就是你没办法根据用户输入或者别的什么在运行期间可能发生变化的量来决定它产生、或执行什么代码。比如下面的代码段，它是不成立的。
 
 ``` C++
-
 template <int i, int j>
 int foo() { return i + j; }
 int main()
 {
-	cin >> x >> y;
-	return foo<x, y>();
+    cin >> x >> y;
+    return foo<x, y>();
 }
-
 ```
 
 这点限制也粉碎了妄图用模板来包办工厂（Factory）甚至是反射的梦想。尽管在《Modern C++ Design》中（别问我为什么老举这本书，因为《C++ Templates》和《Generic Programming》我只是囫囵吞枣读过，基本不记得了)大量运用模板来简化工厂方法；同时C++11和14中的一些机制如Variadic Template更是让这一问题的解决更加彻底。但无论如何，直到C++11/14，光靠模板你就是写不出依靠类名或者ID变量产生类型实例的代码。
@@ -808,7 +804,7 @@ Variant result = addFloatOrMulInt(aVar, bVar);
 
 在模板代码中，这个“合适的机制”就是指“特化”和“部分特化（Partial Specialization）”，后者也叫“偏特化”。
 
-####2.2.2 特化
+#### 2.2.2 特化
 
 我的高中物理老师对我说过一句令我受用至今的话：把自己能做的事情做好。编写模板程序也是一样。当你试图用模板解决问题之前，先撇开那些复杂的语法要素，用最直观的方式表达你的需求：
 
@@ -817,23 +813,23 @@ Variant result = addFloatOrMulInt(aVar, bVar);
 
 int|float addFloatOrMulInt(a, b)
 {
-	if(type is Int)
-	{
-		return a * b;
-	}
-	else if (type is Float)
-	{
-		return a + b;
-	}
+    if(type is Int)
+    {
+        return a * b;
+    }
+    else if (type is Float)
+    {
+        return a + b;
+    }
 }
 
 void foo()
 {
-	float a, b, c;
-	c = addFloatOrMulInt(a, b);		// c = a + b;
+    float a, b, c;
+    c = addFloatOrMulInt(a, b);		// c = a + b;
 	
-	int x, y, z;
-	z = addFloatOrMulInt(x, y);		// z = x * y;
+    int x, y, z;
+    z = addFloatOrMulInt(x, y);		// z = x * y;
 }
 ```
 
@@ -843,26 +839,26 @@ void foo()
 // 这里仍然是伪代码，意思一下，too。
 class AddFloatOrMulInt
 {
-	static int|float Do(a, b)
+    static int|float Do(a, b)
+    {
+        if(type is Int)
+        {
+            return a * b;
+        }
+        else if (type is Float)
 	{
-		if(type is Int)
-		{
-			return a * b;
-		}
-		else if (type is Float)
-		{
-			return a + b;
-		}
-	}
+	    return a + b;
+        }
+    }
 };
 
 void foo()
 {
-	float a, b, c;
-	c = AddFloatOrMulInt::Do(a, b);		// c = a + b;
+    float a, b, c;
+    c = AddFloatOrMulInt::Do(a, b); // c = a + b;
 	
-	int x, y, z;
-	z = AddFloatOrMulInt::Do(x, y);		// z = x * y;
+    int x, y, z;
+    z = AddFloatOrMulInt::Do(x, y); // z = x * y;
 }
 ```
 
@@ -871,11 +867,11 @@ void foo()
 ``` C++
 void foo()
 {
-	float a, b, c;
-	c = AddFloatOrMulInt<float>::Do(a, b);		// c = a + b;
+    float a, b, c;
+    c = AddFloatOrMulInt<float>::Do(a, b); // c = a + b;
 	
-	int x, y, z;
-	z = AddFloatOrMulInt<int>::Do(x, y);		// z = x * y;
+    int x, y, z;
+    z = AddFloatOrMulInt<int>::Do(x, y); // z = x * y;
 }
 ```
 也许你不明白为什么要改写成现在这个样子。看不懂不怪你，怪我讲的不好。但是你别急，先看看这样改写以后能不能跟我们的目标接近一点。如果我们把 `AddFloatOrMulInt<float>::Do` 看作一个普通的函数，那么我们可以写两个实现出来：
@@ -883,21 +879,21 @@ void foo()
 ``` C++
 float AddFloatOrMulInt<float>::Do(float a, float b)
 {
-	return a + b;
+    return a + b;
 }
 
 int AddFloatOrMulInt<int>::Do(int a, int b)
 {
-	return a * b;
+    return a * b;
 }
 
 void foo()
 {
-	float a, b, c;
-	c = AddFloatOrMulInt<float>::Do(a, b);		// c = a + b;
+    float a, b, c;
+    c = AddFloatOrMulInt<float>::Do(a, b); // c = a + b;
 	
-	int x, y, z;
-	z = AddFloatOrMulInt<int>::Do(x, y);		// z = x * y;
+    int x, y, z;
+    z = AddFloatOrMulInt<int>::Do(x, y); // z = x * y;
 }
 ```
 
@@ -907,32 +903,32 @@ void foo()
 // 这个是给float用的。
 template <typename T> class AddFloatOrMulInt
 {
-	T Do(T a, T b)
-	{
-		return a + b;
-	}
+    T Do(T a, T b)
+    {
+        return a + b;
+    }
 };
 
 // 这个是给int用的。
 template <typename T> class AddFloatOrMulInt
 {
-	T Do(T a, T b)
-	{
-		return a * b;
-	}
+    T Do(T a, T b)
+    {
+        return a * b;
+    }
 };
 
 void foo()
 {
-	float a, b, c;
+    float a, b, c;
 
-	// 嗯，我们需要 c = a + b;
-	c = AddFloatOrMulInt<float>::Do(a, b);		
-	// ... 觉得哪里不对劲 ...
-	// ...
-	// ...
-	// ...
-	// 啊！有两个AddFloatOrMulInt，class看起来一模一样，要怎么区分呢！
+    // 嗯，我们需要 c = a + b;
+    c = AddFloatOrMulInt<float>::Do(a, b);
+    // ... 觉得哪里不对劲 ...
+    // ...
+    // ...
+    // ...
+    // 啊！有两个AddFloatOrMulInt，class看起来一模一样，要怎么区分呢！
 }
 ```
 好吧，问题来了！如何要让两个内容不同，但是模板参数形式相同的类进行区分呢？特化！特化（specialization）是根据一个或多个特殊的整数或类型，给出模板实例化时的一个指定内容。我们先来看特化是怎么应用到这个问题上的。
@@ -940,37 +936,37 @@ void foo()
 // 首先，要写出模板的一般形式（原型）
 template <typename T> class AddFloatOrMulInt
 {
-	static T Do(T a, T b)
-	{
-		// 在这个例子里面一般形式里面是什么内容不重要，因为用不上
-		// 这里就随便给个0吧。
-		return T(0);
-	}
+    static T Do(T a, T b)
+    {
+        // 在这个例子里面一般形式里面是什么内容不重要，因为用不上
+        // 这里就随便给个0吧。
+        return T(0);
+    }
 };
 
 // 其次，我们要指定T是int时候的代码，这就是特化：
 template <> class AddFloatOrMulInt<int>
 {
 public:
-	static int Do(int a, int b) // 
-	{
-		return a * b;
-	}
+    static int Do(int a, int b) // 
+    {
+        return a * b;
+    }
 };
 
 // 再次，我们要指定T是float时候的代码：
 template <> class AddFloatOrMulInt<float>
 {
 public:
-	static float Do(float a, float b)
-	{
-		return a + b;
-	}
+    static float Do(float a, float b)
+    {
+        return a + b;
+    }
 };
 
 void foo()
 {
-	// 这里面就不写了
+    // 这里面就不写了
 }
 ```
 我们再把特化的形式拿出来一瞧：这货有点怪啊： `template <> class AddFloatOrMulInt<int>`。别急，我给你解释一下。
@@ -992,7 +988,7 @@ template </* 这里要填什么？ */> class AddFloatOrMulInt<int>;
 // 所以这里放空。
 template <> class AddFloatOrMulInt<int>
 {
-	// ... 针对Int的实现 ... 
+    // ... 针对Int的实现 ... 
 }
 
 // Bingo!
@@ -1005,13 +1001,13 @@ template <> class AddFloatOrMulInt<int>
 template <typename T> class TypeToID
 {
 public:
-	static int const ID = -1;
+    static int const ID = -1;
 };
 
 template <> class TypeToID<uint8_t>
 {
 public:
-	static int const ID = 0;
+    static int const ID = 0;
 };
 ```
 
@@ -1020,14 +1016,14 @@ public:
 ``` C++
 void PrintID()
 {
-	cout << "ID of uint8_t: " << TypeToID<uint8_t>::ID << endl;
+    cout << "ID of uint8_t: " << TypeToID<uint8_t>::ID << endl;
 }
 ```
 嗯，看起来挺简单的，是吧。但是这里透露出了一个非常重要的信号，我希望你已经能察觉出来了： `TypeToID` 如同是一个函数。这个函数只能在编译期间执行。它输入一个类型，输出一个ID。
 
 如果你体味到了这一点，那么恭喜你，你的模板元编程已经开悟了。
 
-####2.2.3 特化：一些其它问题
+#### 2.2.3 特化：一些其它问题
 
 在上一节结束之后，你一定做了许多的练习。我们再来做三个练习。第一，给`float`一个ID；第二，给`void*`一个ID；第三，给任意类型的指针一个ID。先来做第一个:
 
@@ -1038,7 +1034,7 @@ void PrintID()
 
 template <> class TypeToID<float>
 {
-  static int const ID = 0xF10A7;
+    static int const ID = 0xF10A7;
 };
 ```
 
@@ -1047,12 +1043,12 @@ template <> class TypeToID<float>
 ``` C++
 template <> class TypeToID<void*>
 {
-  static int const ID = 0x401d;
+    static int const ID = 0x401d;
 };
 
 void PrintID()
 {
-  cout << "ID of uint8_t: " << TypeToID<void*>::ID << endl;
+    cout << "ID of uint8_t: " << TypeToID<void*>::ID << endl;
 }
 ```
 
@@ -1061,11 +1057,10 @@ void PrintID()
 ``` C++
 class ClassB {};
 
-template <> class TypeToID<void ()>;			// 函数的TypeID
-template <> class TypeToID<int[3]>;				// 数组的TypeID
-template <> class TypeToID<int (int[3])>;		// 这是以数组为参数的函数的TypeID
-template <> class TypeToID<
-	int (ClassB::*[3])(void*, float[2])>;		// 我也不知道这是什么了，自己看着办吧。
+template <> class TypeToID<void ()>; // 函数的TypeID
+template <> class TypeToID<int[3]>; // 数组的TypeID
+template <> class TypeToID<int (int[3])>; // 这是以数组为参数的函数的TypeID
+template <> class TypeToID<int (ClassB::*[3])(void*, float[2])>; // 我也不知道这是什么了，自己看着办吧。
 ```
 
 甚至连 `const` 和 `volatile` 都能装进去
@@ -1079,7 +1074,7 @@ template <> class TypeToID<int const * volatile * const volatile>;
 ``` C++
 void PrintID()
 {
-	cout << "ID of double: " << TypeToID<double>::ID << endl;
+    cout << "ID of double: " << TypeToID<double>::ID << endl;
 }
 ```
 
@@ -1091,20 +1086,20 @@ void PrintID()
 template <typename T> class TypeToID
 {
 public:
-	static int const NotID = -2;
+    static int const NotID = -2;
 };
 
 template <> class TypeToID<float>
 {
 public:
-	static int const ID = 1;
+    static int const ID = 1;
 };
 
 void PrintID()
 {
-	cout << "ID of float: " << TypeToID<float>::ID << endl;	// Print "1"
-	cout << "NotID of float: " << TypeToID<float>::NotID << endl;	// Error! TypeToID<float>使用的特化的类，这个类的实现没有NotID这个成员。
-	cout << "ID of double: " << TypeToID<double>::ID << endl;	// Error! TypeToID<double>是由模板类实例化出来的，它只有NotID，没有ID这个成员。
+    cout << "ID of float: " << TypeToID<float>::ID << endl; // Print "1"
+    cout << "NotID of float: " << TypeToID<float>::NotID << endl; // Error! TypeToID<float>使用的特化的类，这个类的实现没有NotID这个成员。
+    cout << "ID of double: " << TypeToID<double>::ID << endl; // Error! TypeToID<double>是由模板类实例化出来的，它只有NotID，没有ID这个成员。
 }
 ```
 
@@ -1117,14 +1112,14 @@ void PrintID()
 ``` C
 void copy(void* dst, void const* src, size_t elemSize, size_t elemCount, void (*copyElem)(void* dstElem, void const* srcElem))
 {
-	void const* reader = src;
-	void const* writer = dst;
-	for(size_t i = 0; i < elemCount; ++i)
-	{
-		copyElem(writer, reader);
-		advancePointer(reader, elemSize);	// 把Reader指针往后移动一些字节
-		advancePointer(writer, elemSize);
-	}
+    void const* reader = src;
+    void const* writer = dst;
+    for(size_t i = 0; i < elemCount; ++i)
+    {
+        copyElem(writer, reader);
+        advancePointer(reader, elemSize); // 把Reader指针往后移动一些字节
+        advancePointer(writer, elemSize);
+     }
 }
 ```
 
@@ -1161,10 +1156,10 @@ void copy(T* dst, T const* src, size_t elemCount);
 template <typename T>
 void copy(T* dst, T const* src, size_t elemCount)
 {
-	for(size_t i = 0; i < elemCount; ++i)
-	{
-		dst[i] = src[i];
-	}
+    for(size_t i = 0; i < elemCount; ++i)
+    {
+        dst[i] = src[i];
+    }
 }
 ```
 
@@ -1173,11 +1168,11 @@ void copy(T* dst, T const* src, size_t elemCount)
 最后，我们把函数模板学到的东西，也应用到类模板里面：
 
 ``` C++
-template <typename T>					// 嗯，需要一个T
-class TypeToID<T*>						// 我要对所有的指针类型特化，所以这里就写T*
+template <typename T> // 嗯，需要一个T
+class TypeToID<T*> // 我要对所有的指针类型特化，所以这里就写T*
 {
 public:
-	static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+ static int const ID = 0x80000000;	// 用最高位表示它是一个指针
 };
 ```
 
@@ -1186,7 +1181,7 @@ public:
 ``` C++
 void PrintID()
 {
-	cout << "ID of float*: " << TypeToID<float*>::ID << endl;
+    cout << "ID of float*: " << TypeToID<float*>::ID << endl;
 }
 ```
 
@@ -1197,12 +1192,12 @@ void PrintID()
 // TypeToID 的其他代码，略过不表
 // ...
 
-template <typename T>					// 嗯，需要一个T
-class TypeToID<T*>						// 我要对所有的指针类型特化，所以这里就写T*
+template <typename T> // 嗯，需要一个T
+class TypeToID<T*> // 我要对所有的指针类型特化，所以这里就写T*
 {
 public:
-	typedef T		 SameAsT;
-	static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+    typedef T		 SameAsT;
+    static int const ID = 0x80000000; // 用最高位表示它是一个指针
 };
 
 void PrintID()
@@ -1223,20 +1218,20 @@ OK，猜出来了吗，T是`float`。为什么呢？因为你用 `float *` 匹�
 template <typename T>
 class RemovePointer
 {
-	// 啥都不干，你要放一个不是指针的类型进来，我就让你死的难看。
+    // 啥都不干，你要放一个不是指针的类型进来，我就让你死的难看。
 };
 
 template <typename T>
 class RemovePointer<T*>	// 祖传牛皮藓，专治各类指针
 {
 public:
-	typedef T Result;
+    typedef T Result;
 };
 
 void Foo()
 {
-	RemovePointer<float*>::Result x = 5.0f;		// 喏，用RemovePointer后，那个Result就是把float*的指针处理掉以后的结果：float啦。
-	std::cout << x << std::endl;
+    RemovePointer<float*>::Result x = 5.0f; // 喏，用RemovePointer后，那个Result就是把float*的指针处理掉以后的结果：float啦。
+    std::cout << x << std::endl;
 }
 ```
 
@@ -1247,24 +1242,24 @@ OK，如果这个时候，我需要给 `int*` 提供一个更加特殊的特化�
 // TypeToID 的其他代码，略过不表
 // ...
 
-template <typename T>					// 嗯，需要一个T
-class TypeToID<T*>						// 我要对所有的指针类型特化，所以这里就写T*
+template <typename T> // 嗯，需要一个T
+class TypeToID<T*>    // 我要对所有的指针类型特化，所以这里就写T*
 {
 public:
-	typedef T		 SameAsT;
-	static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+    typedef T SameAsT;
+    static int const ID = 0x80000000; // 用最高位表示它是一个指针
 };
 
-template <>								// 嗯，int* 已经是个具体的不能再具体的类型了，所以模板不需要额外的类型参数了
-class TypeToID<int*>					// 嗯，对int*的特化。在这里呢，要把int*整体看作一个类型。
+template <> // 嗯，int* 已经是个具体的不能再具体的类型了，所以模板不需要额外的类型参数了
+class TypeToID<int*> // 嗯，对int*的特化。在这里呢，要把int*整体看作一个类型。
 {
 public:
-	static int const ID = 0x12345678;	// 给一个缺心眼的ID
+    static int const ID = 0x12345678; // 给一个缺心眼的ID
 };
 
 void PrintID()
 {
-	cout << "ID of int*: " << TypeToID<int*>::ID << endl;
+    cout << "ID of int*: " << TypeToID<int*>::ID << endl;
 }
 ```
 
@@ -1288,17 +1283,17 @@ template <typename T> struct X {};
 	
 template <typename T> struct Y
 {
-	typedef X<T> ReboundType;						// 类型定义1
-	typedef typename X<T>::MemberType MemberType;	// 类型定义2
-	typedef UnknownType MemberType3;				// 类型定义3
+    typedef X<T> ReboundType;				// 类型定义1
+    typedef typename X<T>::MemberType MemberType;	// 类型定义2
+    typedef UnknownType MemberType3;			// 类型定义3
 
-	void foo()
-	{
-		X<T> instance0;
-		typename X<T>::MemberType instance1;
-		WTF instance2
-		大王叫我来巡山 - + &
-	}
+    void foo()
+    {
+        X<T> instance0;
+        typename X<T>::MemberType instance1;
+        WTF instance2
+        大王叫我来巡山 - + &
+    }
 };
 ```
 
@@ -1312,7 +1307,7 @@ template <typename T> struct Y
 这时我们就需要请出C++11标准 —— 中的某些概念了。这是我们到目前为止第一次参阅标准。我希望能尽量减少直接参阅标准的次数，因此即便是极为复杂的模板匹配决议我都暂时没有引入标准中的描述。
 然而，Template引入的“双阶段名称查找（Two phase name lookup）”堪称是C++中最黑暗的角落 —— 这是LLVM的团队自己在博客上说的 —— 因此在这里，我们还是有必要去了解标准中是如何规定的。
 
-####2.3.2 名称查找：I am who I am
+#### 2.3.2 名称查找：I am who I am
 在C++标准中对于“名称查找（name lookup）”这个高大上的名词的诠释，主要集中出现在三处。第一处是3.4节，标题名就叫“Name Lookup”；第二处在10.2节，继承关系中的名称查找；第三处在14.6节，名称解析（name resolution）。
 
 名称查找/名称解析，是编译器的基石。对编译原理稍有了解的人，都知道“符号表”的存在即重要意义。考虑一段最基本的C代码：
@@ -1465,13 +1460,13 @@ template <typename T> struct X {};
 	
 template <typename T> struct Y
 {
-	typedef X<T> ReboundType;						// 类型定义1
-	void foo()
-	{
-		X<T> instance0;
-		X<T>::MemberType instance1;
-		WTF instance2
-	}
+    typedef X<T> ReboundType; // 类型定义1
+    void foo()
+    {
+        X<T> instance0;
+        X<T>::MemberType instance1;
+        WTF instance2
+    }
 };
 
 void poo(){
@@ -1574,7 +1569,7 @@ void main() {
 
 扩展阅读： [The Dreaded Two-Phase Name Lookup][2]
 
-####2.3.3 “多余的”  typename 关键字
+#### 2.3.3 “多余的”  typename 关键字
 
 到了这里，2.3.1 中提到的四个问题，还有三个没有解决：
 
@@ -1583,9 +1578,9 @@ template <typename T> struct X {};
 	
 template <typename T> struct Y
 {
-	typedef X<T> ReboundType;						// 这里为什么是正确的？
-	typedef typename X<T>::MemberType MemberType2;	// 这里的typename是做什么的？
-	typedef UnknownType MemberType3;				// 这里为什么会出错？
+    typedef X<T> ReboundType;						// 这里为什么是正确的？
+    typedef typename X<T>::MemberType MemberType2;	// 这里的typename是做什么的？
+    typedef UnknownType MemberType3;				// 这里为什么会出错？
 };
 ```
 
@@ -1596,16 +1591,16 @@ template <typename T> struct Y
 {
     // X可以查找到原型；
     // X<T>是一个依赖性名称，模板定义阶段并不管X<T>是不是正确的。
-	typedef X<T> ReboundType;
+    typedef X<T> ReboundType;
 	
-	// X可以查找到原型；
-	// X<T>是一个依赖性名称，X<T>::MemberType也是一个依赖性名称；
-	// 所以模板声明时也不会管X模板里面有没有MemberType这回事。
-	typedef typename X<T>::MemberType MemberType2;
+    // X可以查找到原型；
+    // X<T>是一个依赖性名称，X<T>::MemberType也是一个依赖性名称；
+    // 所以模板声明时也不会管X模板里面有没有MemberType这回事。
+    typedef typename X<T>::MemberType MemberType2;
 	
-	// UnknownType 不是一个依赖性名称
-	// 而且这个名字在当前作用域中不存在，所以直接报错。
-	typedef UnknownType MemberType3;				
+    // UnknownType 不是一个依赖性名称
+    // 而且这个名字在当前作用域中不存在，所以直接报错。
+    typedef UnknownType MemberType3;				
 };
 ```
 
@@ -1662,9 +1657,9 @@ template <typename T> struct X {
 
 ## 3   深入理解特化与偏特化
 
-###3.1 正确的理解偏特化
+### 3.1 正确的理解偏特化
 
-####3.1.1 偏特化与函数重载的比较
+#### 3.1.1 偏特化与函数重载的比较
 
 在前面的章节中，我们介绍了偏特化的形式、也介绍了简单的用例。因为偏特化和函数重载存在着形式上的相似性，因此初学者便会借用重载的概念，来理解偏特化的行为。只是，重载和偏特化尽管相似但仍有差异。
 
@@ -1937,7 +1932,7 @@ template <typename... Ts, typename U> class Y<Ts..., U> {};    // (4) error!
 
 在这里，我们只提到了变长模板参数的声明，如何使用我们将在第四章讲述。
 
-####3.1.3 模板的默认实参
+#### 3.1.3 模板的默认实参
 
 在上一节中，我们介绍了模板对默认实参的支持。当时我们的例子很简单，默认模板实参是一个确定的类型`void`或者自定义的`null_type`：
 
@@ -2084,7 +2079,7 @@ void foo(){
   
   * A和B都与模板实参无法匹配，所以使用原型，调用`CustomDiv`
 
-###3.2 后悔药：SFINAE
+### 3.2 后悔药：SFINAE
 
 考虑下面这个函数模板：
 
@@ -2538,34 +2533,34 @@ void foo(
 （补充例子：构造函数上的enable_if）
 
 ## 4 元编程下的数据结构与算法
-###4.1 表达式与数值计算
-###4.1 获得类型的属性——类型萃取（Type Traits） 
-###4.2 列表与数组
-###4.3 字典结构
-###4.4 “快速”排序
-###4.5 其它常用的“轮子”
+### 4.1 表达式与数值计算
+### 4.1 获得类型的属性——类型萃取（Type Traits） 
+### 4.2 列表与数组
+### 4.3 字典结构
+### 4.4 “快速”排序
+### 4.5 其它常用的“轮子”
 
 ## 5 模板的进阶技巧
-###5.1 嵌入类
-###5.2 Template-Template Class
-###5.3 高阶函数
-###5.4 闭包：模板的“基于对象”
+### 5.1 嵌入类
+### 5.2 Template-Template Class
+### 5.3 高阶函数
+### 5.4 闭包：模板的“基于对象”
 stl allocator?
 mpl::apply
-###5.5 占位符(placeholder)：在C++中实现方言的基石
-###5.6 编译期“多态”
+### 5.5 占位符(placeholder)：在C++中实现方言的基石
+### 5.6 编译期“多态”
 
 ## 6   模板的威力：从foreach, transform到Linq
-###6.1 Foreach与Transform
-###6.2 Boost中的模板
+### 6.1 Foreach与Transform
+### 6.2 Boost中的模板
 Any Spirit Hana TypeErasure
-###6.3 Reactor、Linq与C++中的实践
-###6.4 更高更快更强：从Linq到FP
+### 6.3 Reactor、Linq与C++中的实践
+### 6.4 更高更快更强：从Linq到FP
 
 ## 7   结语：讨论有益，争端无用
-###7.1 更好的编译器，更友善的出错信息
-###7.2 模板的症结：易于实现，难于完美
-###7.3 一些期望
+### 7.1 更好的编译器，更友善的出错信息
+### 7.2 模板的症结：易于实现，难于完美
+### 7.3 一些期望
 alexandrescu 关于 min max 的讨论：《再谈Min和Max》
 std::experimental::any / boost.any 对于 reference 的处理
 
