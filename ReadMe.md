@@ -82,6 +82,9 @@ void SampleCode() {
   * 模板的使用动机。
   * 增加“如何使用本文”一节。本节将说明全书的体例（强调字体、提示语、例子的组织），所有的描述、举例、引用在重审时将按照体例要求重新组织。
   * 除了用于描述语法的例子外，其他例子将尽量赋予实际意义，以方便阐述意图。
+  * 在合适的章节完整叙述模板的类型推导规则。Parameter-Argument, auto variable, decltype, decltype(auto)
+  * 在函数模板重载和实例化的部分讲述ADL。
+  * 变参模板处应当按照标准（Argument Packing/Unpacking）来讲解。
 * 建议：
   * 比较模板和函数的差异性
   * 蓝色：C++14 Return type deduction for normal functions 的分析
