@@ -2511,7 +2511,7 @@ void doSomething() {
 template <typename ArgT> void foo(ArgT&& a);
 ```
 
-加入我们要限定ArgT只能是 float 的衍生类型，那么写成下面这个样子是不对的，它实际上只能接受 float 的右值引用。
+假如我们要限定ArgT只能是 float 的衍生类型，那么写成下面这个样子是不对的，它实际上只能接受 float 的右值引用。
 
 ```C++
 void foo(float&& a);
