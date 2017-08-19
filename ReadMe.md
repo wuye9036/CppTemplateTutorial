@@ -2106,7 +2106,7 @@ void foo(T t, typename U::type u) {
 }
 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == int
+  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
 }
 ```
 
@@ -2127,7 +2127,7 @@ void foo(T t, typename U::type u) {
 }
 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == int
+  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
   foo<int, Y>(5, 5.0); // ???
 }
 ```
@@ -2165,7 +2165,7 @@ void foo(T t, typename U::type2 u) {
   // ...
 } 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == int
+  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
   foo<int, Y>( 1, 1.0 ); // ???
 }
 ```
