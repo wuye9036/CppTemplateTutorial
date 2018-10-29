@@ -579,11 +579,11 @@ template <float a> class E {}; // ERROR: 别闹！早说过只能是整数类型
 class StackInt
 {
 public:
-    void push(Int v);
-    Int pop();
-    Int Find(Int x)
+    void push(int v);
+    int pop();
+    int Find(int x)
     {
-        for(Int i = 1; i <= size; )
+        for(int i = 0; i < size; ++i)
         {
             if(data[i] == x) { return i; }
         }
@@ -598,11 +598,11 @@ public:
 class StackFloat
 {
 public:
-    void push(Float v);
-    Float pop();
-    Int Find(Float x)
+    void push(float v);
+    float pop();
+    float Find(float x)
     {
-        for(Int i = 1; i <= size; )
+        for(int i = 0; i < size; ++i)
         {
             if(data[i] == x) { return i; }
         }
@@ -634,9 +634,9 @@ class Stack
 public:
     void push(T v);
     T pop();
-    Int Find(T x)
+    T Find(T x)
     {
-        for(Int i = 0; i <= size; ++i)
+        for(int i = 0; i < size; ++i)
         {
             if(data[i] == x) { return i; }
         }
