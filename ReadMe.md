@@ -2106,7 +2106,7 @@ void foo(T t, typename U::type u) {
 }
 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == int
+  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
 }
 ```
 
@@ -2127,7 +2127,7 @@ void foo(T t, typename U::type u) {
 }
 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == int
+  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
   foo<int, Y>(5, 5.0); // ???
 }
 ```
@@ -2165,7 +2165,7 @@ void foo(T t, typename U::type2 u) {
   // ...
 } 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == int
+  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
   foo<int, Y>( 1, 1.0 ); // ???
 }
 ```
@@ -2511,7 +2511,7 @@ void doSomething() {
 template <typename ArgT> void foo(ArgT&& a);
 ```
 
-加入我们要限定ArgT只能是 float 的衍生类型，那么写成下面这个样子是不对的，它实际上只能接受 float 的右值引用。
+假如我们要限定ArgT只能是 float 的衍生类型，那么写成下面这个样子是不对的，它实际上只能接受 float 的右值引用。
 
 ```C++
 void foo(float&& a);
