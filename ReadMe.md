@@ -600,7 +600,7 @@ class StackFloat
 public:
     void push(float v);
     float pop();
-    float Find(float x)
+    int Find(float x)
     {
         for(int i = 0; i < size; ++i)
         {
@@ -634,7 +634,7 @@ class Stack
 public:
     void push(T v);
     T pop();
-    T Find(T x)
+    int Find(T x)
     {
         for(int i = 0; i < size; ++i)
         {
