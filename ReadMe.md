@@ -2384,7 +2384,7 @@ template <typename T> void inc_counter(T& intTypeCounter);
 template <typename T> void inc_counter(
   T& counterObj, 
   typename std::enable_if<
-    std::is_base_of<T, ICounter>::value
+    std::is_base_of<ICounter, T>::value
   >::type* = nullptr );
 
 template <typename T> void inc_counter(
