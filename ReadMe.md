@@ -2384,7 +2384,7 @@ template <typename T> void inc_counter(T& intTypeCounter);
 template <typename T> void inc_counter(
   T& counterObj, 
   typename std::enable_if<
-    is_base_of<T, ICounter>::value
+    std::is_base_of<T, ICounter>::value
   >::type* = nullptr );
 
 template <typename T> void inc_counter(
@@ -2558,7 +2558,7 @@ template <typename ArgT>
 void foo(
   ArgT&& a, 
   typename std::enabled_if<
-    is_same<std::decay_t<ArgT>, float>::value
+    std::is_same<std::decay_t<ArgT>, float>::value
   >::type* = nullptr
 );
 ```
