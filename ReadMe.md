@@ -979,7 +979,7 @@ void foo()
 template <typename T> class AddFloatOrMulInt;
 
 // 但是这个类，是给T是Int的时候用的，于是我们写作
-class AddFloatOrMulInt<int>
+class AddFloatOrMulInt<int>;
 // 当然，这里编译是通不过的。
 
 // 但是它又不是个普通类，而是类模板的一个特化（特例）。
@@ -992,7 +992,7 @@ template </* 这里要填什么？ */> class AddFloatOrMulInt<int>;
 template <> class AddFloatOrMulInt<int>
 {
     // ... 针对Int的实现 ... 
-}
+};
 
 // Bingo!
 ```
@@ -1222,7 +1222,7 @@ template <typename T>
 class RemovePointer
 {
 public:
-    typedef T Resylt;  // 如果放进来的不是一个指针，那么它就是我们要的结果。
+    typedef T Result;  // 如果放进来的不是一个指针，那么它就是我们要的结果。
 };
 
 template <typename T>
@@ -1340,9 +1340,9 @@ printf("Result: %d", b);
 在这段代码中，所有出现的符号可以分为以下几类：
 
 * `int`：类型标识符，代表整型；
-* `a`,`b`,`printf`：变量名或函数名；
-* `=`,`+`,`*`：运算符；
-* `,`,`;`,`(`,`)`：分隔符；
+* `a`, `b`, `printf`：变量名或函数名；
+* `=`, `+`, `*`：运算符；
+* `,`, `;`, `(`, `)`：分隔符；
 
 那么，编译器怎么知道`int`就是整数类型，`b=(a+1)*2`中的`a`和`b`就是整型变量呢？这就是名称查找/名称解析的作用：它告诉编译器，这个标识符（identifer）是在哪里被声明或定义的，它究竟是什么意思。
 
@@ -1475,7 +1475,7 @@ X<float> xf;
 此时如果X中有一些与模板参数无关的错误，如果名称查找/语义分析在两个阶段完成，那么这些错误会很早、且唯一的被提示出来；但是如果一切都在实例化时处理，那么可能会导致不同的实例化过程提示同样的错误。而模板在运用过程中，往往会产生很多实例，此时便会大量报告同样的错误。
 
 当然，MSVC并不会真的这么做。根据推测，最终他们是合并了相同的错误。因为即便对于模板参数相关的编译错误，也只能看到最后一次实例化的错误信息：
-```
+```C++
 template <typename T> struct X {};
 	
 template <typename T> struct Y
@@ -1834,7 +1834,7 @@ X<double*, double>   v8;
 
 > 令`T`是模板类型实参或者类型列表（如 _int, float, double_  这样的，`TT`是template-template实参（参见6.2节），`i`是模板的非类型参数（整数、指针等），则以下形式的形参都会参与匹配：
 
-> `T`,`cv-list T`,`T*`, `template-name <T>`, `T&`, `T&&`
+> `T`, `cv-list T`, `T*`, `template-name <T>`, `T&`, `T&&`
 
 >`T [ integer-constant ]`
 
@@ -2565,7 +2565,7 @@ void foo(
 
 从上面这些例子可以看到，SFINAE最主要的作用，是保证编译器在泛型函数、偏特化、及一般重载函数中遴选函数原型的候选列表时不被打断。除此之外，它还有一个很重要的元编程作用就是实现部分的编译期自省和反射。
 
-虽然它写起来并不直观，但是对于既没有编译器自省、也没有Concept的C++1y来说，已经是最好的选择了。
+虽然它写起来并不直观，但是对于既没有编译器自省、也没有Concept的C++11来说，已经是最好的选择了。
 
 （补充例子：构造函数上的enable_if）
 
