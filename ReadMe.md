@@ -2290,7 +2290,7 @@ functionName (
 ```C++
 template <
   typename T, 
-  typenname U = typename vector<T>::iterator // 1
+  typename U = typename vector<T>::iterator // 1
 >
 typename vector<T>::value_type  // 1
   foo( 
