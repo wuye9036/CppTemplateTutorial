@@ -105,7 +105,7 @@ Template Class定义：
 ```C++
 template <typename T> class ClassA
 {
-	T member;
+    T member;
 };
 ```
 
@@ -124,7 +124,7 @@ void foo(int a);
 ``` C++
 // 注意：这并不是有效的C++语法，只是为了说明模板的作用
 typedef class {
-	int member;
+    int member;
 } ClassA<int>;
 ```
 
@@ -139,11 +139,11 @@ template <typename T>
 class vector
 {
 public:
-	void push_back(T const&);
-	void clear();				
+    void push_back(T const&);
+    void clear();				
 	
 private:
-	T* elements;
+    T* elements;
 };
 ```
 
@@ -225,7 +225,7 @@ private:
 template <typename T>
 void vector<T>::clear()  // 函数的实现放在这里
 {
-	// Function body
+    // Function body
 }
 ```
 
@@ -668,11 +668,11 @@ Float  : VInt64Mul(floatx2, floatx2)
 for(v4a, v4b : vectorsA, vectorsB)
 {
     if type is Int8, Int16
-		VInt32Mul( ConvertToInt32(v4a), ConvertToInt32(v4b) )
-	elif type is Int32
-		VInt32Mul( v4a, v4b )
-	elif type is Float
-		...
+        VInt32Mul( ConvertToInt32(v4a), ConvertToInt32(v4b) )
+    elif type is Int32
+        VInt32Mul( v4a, v4b )
+    elif type is Float
+        ...
 }
 ```
 
@@ -1175,7 +1175,7 @@ template <typename T> // 嗯，需要一个T
 class TypeToID<T*> // 我要对所有的指针类型特化，所以这里就写T*
 {
 public:
- static int const ID = 0x80000000;	// 用最高位表示它是一个指针
+    static int const ID = 0x80000000;	// 用最高位表示它是一个指针
 };
 ```
 
@@ -1205,7 +1205,7 @@ public:
 
 void PrintID()
 {
-	cout << "ID of float*: " << TypeToID< TypeToID<float*>::SameAsT >::ID << endl;
+    cout << "ID of float*: " << TypeToID< TypeToID<float*>::SameAsT >::ID << endl;
 }
 ```
 
@@ -1461,7 +1461,7 @@ void foo(){
 // ----------- X.h ------------
 
 template <typename T> struct X {
-      // 实现代码
+    // 实现代码
 };
 
 // ---------- X.cpp -----------
@@ -2123,7 +2123,7 @@ void foo(){
 ``` C++
 template <typename T, typename U>
 void foo(T t, typename U::type u) {
-  // ...
+    // ...
 }
 ```
 
@@ -2131,16 +2131,16 @@ void foo(T t, typename U::type u) {
 
 ``` C++
 struct X {
-  typedef float type;
+    typedef float type;
 };
 
 template <typename T, typename U>
 void foo(T t, typename U::type u) {
-  // ...
+    // ...
 }
 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
+    foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
 }
 ```
 
@@ -2148,11 +2148,11 @@ void callFoo() {
 
 ```C++
 struct X {
-  typedef float type;
+    typedef float type;
 };
 
 struct Y {
-  typedef float type2;
+    typedef float type2;
 };
 
 template <typename T, typename U>
@@ -2161,8 +2161,8 @@ void foo(T t, typename U::type u) {
 }
 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
-  foo<int, Y>(5, 5.0); // ???
+    foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
+    foo<int, Y>(5, 5.0); // ???
 }
 ```
 
@@ -2182,16 +2182,16 @@ error: no matching function for call to 'foo'
 
 ```C++
 struct X {
-  typedef float type;
+    typedef float type;
 };
 
 struct Y {
-  typedef float type2;
+    typedef float type2;
 };
 
 template <typename T, typename U>
 void foo(T t, typename U::type u) {
-  // ...
+    // ...
 }
 
 template <typename T, typename U>
@@ -2199,8 +2199,8 @@ void foo(T t, typename U::type2 u) {
   // ...
 } 
 void callFoo() {
-  foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
-  foo<int, Y>( 1, 1.0 ); // ???
+    foo<int, X>(5, 5.0); // T == int, typename U::type == X::type == float
+    foo<int, Y>( 1, 1.0 ); // ???
 }
 ```
 
@@ -2245,9 +2245,9 @@ void foo(A const&) {}
 void foo(B const&) {}
 
 void callFoo() {
-  foo( A() );
-  foo( B() );
-  foo( C() );
+    foo( A() );
+    foo( B() );
+    foo( C() );
 }
 ```
 
@@ -2271,17 +2271,17 @@ void callFoo() {
 
 ```C++
 template <
-  typename T0, 
-  // 一大坨其他模板参数
-  typename U = /* 和前面T有关的一大坨 */
+    typename T0, 
+    // 一大坨其他模板参数
+    typename U = /* 和前面T有关的一大坨 */
 >
 RType /* 和模板参数有关的一大坨 */
 functionName (
-   PType0 /* PType0 是和模板参数有关的一大坨 */,
-   PType1 /* PType1 是和模板参数有关的一大坨 */,
-   // ... 其他参数
+    PType0 /* PType0 是和模板参数有关的一大坨 */,
+    PType1 /* PType1 是和模板参数有关的一大坨 */,
+    // ... 其他参数
 ) {
-  // 实现，和模板参数有关的一大坨
+    // 实现，和模板参数有关的一大坨
 }
 ```
 
@@ -2289,19 +2289,19 @@ functionName (
 
 ```C++
 template <
-  typename T, 
-  typenname U = typename vector<T>::iterator // 1
+    typename T, 
+    typename U = typename vector<T>::iterator // 1
 >
 typename vector<T>::value_type  // 1
-  foo( 
-      T*, // 1
-      T&, // 1
-      typename T::internal_type, // 1
-      typename add_reference<T>::type, // 1
-      int // 这里都不需要 substitution
-  )
+foo(
+    T*, // 1
+    T&, // 1
+    typename T::internal_type, // 1
+    typename add_reference<T>::type, // 1
+    int // 这里都不需要 substitution
+)
 {
-   // 整个实现部分，都没有 substitution。这个很关键。
+  // 整个实现部分，都没有 substitution。这个很关键。
 }
 ```
 
@@ -2311,11 +2311,11 @@ typename vector<T>::value_type  // 1
 
 ```C++
 struct X {
-  typedef int type;
+    typedef int type;
 };
 
 struct Y {
-  typedef int type2;
+    typedef int type2;
 };
 
 template <typename T> void foo(typename T::type);    // Foo0
@@ -2323,9 +2323,9 @@ template <typename T> void foo(typename T::type2);   // Foo1
 template <typename T> void foo(T);                   // Foo2
 
 void callFoo() {
-   foo<X>(5);    // Foo0: Succeed, Foo1: Failed,  Foo2: Failed
-   foo<Y>(10);   // Foo0: Failed,  Foo1: Succeed, Foo2: Failed
-   foo<int>(15); // Foo0: Failed,  Foo1: Failed,  Foo2: Succeed
+    foo<X>(5);    // Foo0: Succeed, Foo1: Failed,  Foo2: Failed
+    foo<Y>(10);   // Foo0: Failed,  Foo1: Succeed, Foo2: Failed
+    foo<int>(15); // Foo0: Failed,  Foo1: Failed,  Foo2: Succeed
 }
 ```
 
@@ -2337,33 +2337,33 @@ std/boost库中的 `enable_if` 是 SFINAE 最直接也是最主要的应用。�
 
 ```C++
 struct ICounter {
-  virtual void increase() = 0;
-  virtual ~ICounter() {}
+    virtual void increase() = 0;
+    virtual ~ICounter() {}
 };
 
 struct Counter: public ICounter {
-   void increase() override {
-      // Implements
-   }
+    void increase() override {
+        // Implements
+    }
 };
 
 template <typename T>
 void inc_counter(T& counterObj) {
-  counterObj.increase();
+    counterObj.increase();
 }
 
 template <typename T>
 void inc_counter(T& intTypeCounter){
-  ++intTypeCounter;
+    ++intTypeCounter;
 }
 
 void doSomething() {
-  Counter cntObj;
-  uint32_t cntUI32;
+    Counter cntObj;
+    uint32_t cntUI32;
 
-  // blah blah blah
-  inc_counter(cntObj);
-  inc_counter(cntUI32);
+    // blah blah blah
+    inc_counter(cntObj);
+    inc_counter(cntUI32);
 }
 ```
 
@@ -2382,16 +2382,16 @@ template <typename T> void inc_counter(T& intTypeCounter);
 
 ```C++
 template <typename T> void inc_counter(
-  T& counterObj, 
-  typename std::enable_if<
-    std::is_base_of<ICounter, T>::value
-  >::type* = nullptr );
+    T& counterObj, 
+    typename std::enable_if<
+        std::is_base_of<ICounter, T>::value
+    >::type* = nullptr );
 
 template <typename T> void inc_counter(
-  T& counterInt,
-  typename std::enable_if<
-    std::is_integral<T>::value
-  >::type* = nullptr );
+    T& counterInt,
+    typename std::enable_if<
+        std::is_integral<T>::value
+    >::type* = nullptr );
 ```
 
 然后我们解释一下，这个 `enable_if` 是怎么工作的，语法为什么这么丑：
@@ -2426,9 +2426,9 @@ void inc_counter(ICounter& counterObj);
 ```C++
 struct ICounter {};
 struct Counter: public ICounter {
-  void increase() {
-    // impl
-  }
+    void increase() {
+        // impl
+    }
 };
 ```
 
@@ -2442,13 +2442,13 @@ template <typename T>
 void inc_counter(T& c) { ++c; };
 
 void doSomething() {
-  Counter cntObj;
-  uint32_t cntUI32;
+    Counter cntObj;
+    uint32_t cntUI32;
 
-  // blah blah blah
-  inc_counter(cntObj); // 1
-  inc_counter(static_cast<ICounter&>(cntObj)); // 2
-  inc_counter(cntUI32); // 3
+    // blah blah blah
+    inc_counter(cntObj); // 1
+    inc_counter(static_cast<ICounter&>(cntObj)); // 2
+    inc_counter(cntUI32); // 3
 }
 ```
 
@@ -2466,34 +2466,34 @@ void doSomething() {
 
 struct ICounter {};
 struct Counter: public ICounter {
-  void increase() {
-    // impl
-  }
+    void increase() {
+        // impl
+    }
 };
 
 template <typename T> void inc_counter(
-  T& counterObj, 
-  typename std::enable_if<
-    std::is_base_of<ICounter, T>::value
-  >::type* = nullptr ){
-  counterObj.increase();  
+    T& counterObj, 
+    typename std::enable_if<
+        std::is_base_of<ICounter, T>::value
+    >::type* = nullptr ){
+    counterObj.increase();  
 }
 
 template <typename T> void inc_counter(
-  T& counterInt,
-  typename std::enable_if<
-    std::is_integral<T>::value
-  >::type* = nullptr ){
-  ++counterInt;
+    T& counterInt,
+    typename std::enable_if<
+        std::is_integral<T>::value
+    >::type* = nullptr ){
+    ++counterInt;
 }
   
 void doSomething() {
-  Counter cntObj;
-  uint32_t cntUI32;
+    Counter cntObj;
+    uint32_t cntUI32;
 
-  // blah blah blah
-  inc_counter(cntObj); // OK!
-  inc_counter(cntUI32); // OK!
+    // blah blah blah
+    inc_counter(cntObj); // OK!
+    inc_counter(cntUI32); // OK!
 }
 ```
 
@@ -2513,28 +2513,28 @@ template <typename T> void foo(T& c, decltype(c.increase())* = nullptr);
 
 ```C++
 struct Counter {
-   void increase() {
-      // Implements
-   }
+    void increase() {
+        // Implements
+    }
 };
 
 template <typename T>
 void inc_counter(T& intTypeCounter, std::decay_t<decltype(++intTypeCounter)>* = nullptr) {
-  ++intTypeCounter;
+    ++intTypeCounter;
 }
 
 template <typename T>
 void inc_counter(T& counterObj, std::decay_t<decltype(counterObj.increase())>* = nullptr) {
-  counterObj.increase();
+    counterObj.increase();
 }
 
 void doSomething() {
-  Counter cntObj;
-  uint32_t cntUI32;
+    Counter cntObj;
+    uint32_t cntUI32;
 
-  // blah blah blah
-  inc_counter(cntObj);
-  inc_counter(cntUI32);
+    // blah blah blah
+    inc_counter(cntObj);
+    inc_counter(cntUI32);
 }
 ```
 
@@ -2556,10 +2556,10 @@ void foo(float&& a);
 ```C++
 template <typename ArgT>
 void foo(
-  ArgT&& a, 
-  typename std::enabled_if<
-    std::is_same<std::decay_t<ArgT>, float>::value
-  >::type* = nullptr
+    ArgT&& a, 
+    typename std::enabled_if<
+        std::is_same<std::decay_t<ArgT>, float>::value
+    >::type* = nullptr
 );
 ```
 
