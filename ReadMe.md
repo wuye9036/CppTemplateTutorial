@@ -1,5 +1,6 @@
 # C++ Template 进阶指南
 
+章节目录由VSCode插件[Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one)生成。
 - [C++ Template 进阶指南](#c-template-%e8%bf%9b%e9%98%b6%e6%8c%87%e5%8d%97)
   - [0. 前言](#0-%e5%89%8d%e8%a8%80)
     - [0.1 C++另类简介：比你用的复杂，但比你想的简单](#01-c%e5%8f%a6%e7%b1%bb%e7%ae%80%e4%bb%8b%e6%af%94%e4%bd%a0%e7%94%a8%e7%9a%84%e5%a4%8d%e6%9d%82%e4%bd%86%e6%af%94%e4%bd%a0%e6%83%b3%e7%9a%84%e7%ae%80%e5%8d%95)
