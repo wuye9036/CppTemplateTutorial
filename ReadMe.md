@@ -1,5 +1,67 @@
-
 # C++ Template 进阶指南
+
+章节目录由VSCode插件[Markdown All in One](https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one)生成。
+- [C++ Template 进阶指南](#c-template-%e8%bf%9b%e9%98%b6%e6%8c%87%e5%8d%97)
+  - [0. 前言](#0-%e5%89%8d%e8%a8%80)
+    - [0.1 C++另类简介：比你用的复杂，但比你想的简单](#01-c%e5%8f%a6%e7%b1%bb%e7%ae%80%e4%bb%8b%e6%af%94%e4%bd%a0%e7%94%a8%e7%9a%84%e5%a4%8d%e6%9d%82%e4%bd%86%e6%af%94%e4%bd%a0%e6%83%b3%e7%9a%84%e7%ae%80%e5%8d%95)
+    - [0.2 适宜读者群](#02-%e9%80%82%e5%ae%9c%e8%af%bb%e8%80%85%e7%be%a4)
+    - [0.3 版权](#03-%e7%89%88%e6%9d%83)
+    - [0.4 推荐编译环境](#04-%e6%8e%a8%e8%8d%90%e7%bc%96%e8%af%91%e7%8e%af%e5%a2%83)
+    - [0.5 体例](#05-%e4%bd%93%e4%be%8b)
+      - [0.5.1 示例代码](#051-%e7%a4%ba%e4%be%8b%e4%bb%a3%e7%a0%81)
+      - [0.5.2 引用](#052-%e5%bc%95%e7%94%a8)
+    - [0.6 意见、建议、喷、补遗、写作计划](#06-%e6%84%8f%e8%a7%81%e5%bb%ba%e8%ae%ae%e5%96%b7%e8%a1%a5%e9%81%97%e5%86%99%e4%bd%9c%e8%ae%a1%e5%88%92)
+  - [1. Template的基本语法](#1-template%e7%9a%84%e5%9f%ba%e6%9c%ac%e8%af%ad%e6%b3%95)
+    - [1.1 Template Class基本语法](#11-template-class%e5%9f%ba%e6%9c%ac%e8%af%ad%e6%b3%95)
+      - [1.1.1 Template Class的与成员变量定义](#111-template-class%e7%9a%84%e4%b8%8e%e6%88%90%e5%91%98%e5%8f%98%e9%87%8f%e5%ae%9a%e4%b9%89)
+      - [1.1.2 模板的使用](#112-%e6%a8%a1%e6%9d%bf%e7%9a%84%e4%bd%bf%e7%94%a8)
+      - [1.1.3 模板类的成员函数定义](#113-%e6%a8%a1%e6%9d%bf%e7%b1%bb%e7%9a%84%e6%88%90%e5%91%98%e5%87%bd%e6%95%b0%e5%ae%9a%e4%b9%89)
+    - [1.2 Template Function的基本语法](#12-template-function%e7%9a%84%e5%9f%ba%e6%9c%ac%e8%af%ad%e6%b3%95)
+      - [1.2.1 Template Function的声明和定义](#121-template-function%e7%9a%84%e5%a3%b0%e6%98%8e%e5%92%8c%e5%ae%9a%e4%b9%89)
+      - [1.2.2 模板函数的使用](#122-%e6%a8%a1%e6%9d%bf%e5%87%bd%e6%95%b0%e7%9a%84%e4%bd%bf%e7%94%a8)
+    - [1.3 整型也可是Template参数](#13-%e6%95%b4%e5%9e%8b%e4%b9%9f%e5%8f%af%e6%98%aftemplate%e5%8f%82%e6%95%b0)
+    - [1.4 模板形式与功能是统一的](#14-%e6%a8%a1%e6%9d%bf%e5%bd%a2%e5%bc%8f%e4%b8%8e%e5%8a%9f%e8%83%bd%e6%98%af%e7%bb%9f%e4%b8%80%e7%9a%84)
+  - [2.  模板元编程基础](#2-%e6%a8%a1%e6%9d%bf%e5%85%83%e7%bc%96%e7%a8%8b%e5%9f%ba%e7%a1%80)
+    - [2.1 编程，元编程，模板元编程](#21-%e7%bc%96%e7%a8%8b%e5%85%83%e7%bc%96%e7%a8%8b%e6%a8%a1%e6%9d%bf%e5%85%83%e7%bc%96%e7%a8%8b)
+    - [2.2 模板世界的If-Then-Else：类模板的特化与偏特化](#22-%e6%a8%a1%e6%9d%bf%e4%b8%96%e7%95%8c%e7%9a%84if-then-else%e7%b1%bb%e6%a8%a1%e6%9d%bf%e7%9a%84%e7%89%b9%e5%8c%96%e4%b8%8e%e5%81%8f%e7%89%b9%e5%8c%96)
+      - [2.2.1 根据类型执行代码](#221-%e6%a0%b9%e6%8d%ae%e7%b1%bb%e5%9e%8b%e6%89%a7%e8%a1%8c%e4%bb%a3%e7%a0%81)
+      - [2.2.2 特化](#222-%e7%89%b9%e5%8c%96)
+      - [2.2.3 特化：一些其它问题](#223-%e7%89%b9%e5%8c%96%e4%b8%80%e4%ba%9b%e5%85%b6%e5%ae%83%e9%97%ae%e9%a2%98)
+    - [2.3 即用即推导](#23-%e5%8d%b3%e7%94%a8%e5%8d%b3%e6%8e%a8%e5%af%bc)
+      - [2.3.1 视若无睹的语法错误](#231-%e8%a7%86%e8%8b%a5%e6%97%a0%e7%9d%b9%e7%9a%84%e8%af%ad%e6%b3%95%e9%94%99%e8%af%af)
+      - [2.3.2 名称查找：I am who I am](#232-%e5%90%8d%e7%a7%b0%e6%9f%a5%e6%89%bei-am-who-i-am)
+      - [2.3.3 “多余的”  typename 关键字](#233-%e5%a4%9a%e4%bd%99%e7%9a%84-typename-%e5%85%b3%e9%94%ae%e5%ad%97)
+    - [2.4 本章小结](#24-%e6%9c%ac%e7%ab%a0%e5%b0%8f%e7%bb%93)
+  - [3   深入理解特化与偏特化](#3-%e6%b7%b1%e5%85%a5%e7%90%86%e8%a7%a3%e7%89%b9%e5%8c%96%e4%b8%8e%e5%81%8f%e7%89%b9%e5%8c%96)
+    - [3.1 正确的理解偏特化](#31-%e6%ad%a3%e7%a1%ae%e7%9a%84%e7%90%86%e8%a7%a3%e5%81%8f%e7%89%b9%e5%8c%96)
+      - [3.1.1 偏特化与函数重载的比较](#311-%e5%81%8f%e7%89%b9%e5%8c%96%e4%b8%8e%e5%87%bd%e6%95%b0%e9%87%8d%e8%bd%bd%e7%9a%84%e6%af%94%e8%be%83)
+      - [3.1.2 不定长的模板参数](#312-%e4%b8%8d%e5%ae%9a%e9%95%bf%e7%9a%84%e6%a8%a1%e6%9d%bf%e5%8f%82%e6%95%b0)
+      - [3.1.3 模板的默认实参](#313-%e6%a8%a1%e6%9d%bf%e7%9a%84%e9%bb%98%e8%ae%a4%e5%ae%9e%e5%8f%82)
+    - [3.2 后悔药：SFINAE](#32-%e5%90%8e%e6%82%94%e8%8d%afsfinae)
+  - [!!! 以下章节未完成 !!!](#%e4%bb%a5%e4%b8%8b%e7%ab%a0%e8%8a%82%e6%9c%aa%e5%ae%8c%e6%88%90)
+  - [4 元编程下的数据结构与算法](#4-%e5%85%83%e7%bc%96%e7%a8%8b%e4%b8%8b%e7%9a%84%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84%e4%b8%8e%e7%ae%97%e6%b3%95)
+    - [4.1 表达式与数值计算](#41-%e8%a1%a8%e8%be%be%e5%bc%8f%e4%b8%8e%e6%95%b0%e5%80%bc%e8%ae%a1%e7%ae%97)
+    - [4.1 获得类型的属性——类型萃取（Type Traits）](#41-%e8%8e%b7%e5%be%97%e7%b1%bb%e5%9e%8b%e7%9a%84%e5%b1%9e%e6%80%a7%e7%b1%bb%e5%9e%8b%e8%90%83%e5%8f%96type-traits)
+    - [4.2 列表与数组](#42-%e5%88%97%e8%a1%a8%e4%b8%8e%e6%95%b0%e7%bb%84)
+    - [4.3 字典结构](#43-%e5%ad%97%e5%85%b8%e7%bb%93%e6%9e%84)
+    - [4.4 “快速”排序](#44-%e5%bf%ab%e9%80%9f%e6%8e%92%e5%ba%8f)
+    - [4.5 其它常用的“轮子”](#45-%e5%85%b6%e5%ae%83%e5%b8%b8%e7%94%a8%e7%9a%84%e8%bd%ae%e5%ad%90)
+  - [5 模板的进阶技巧](#5-%e6%a8%a1%e6%9d%bf%e7%9a%84%e8%bf%9b%e9%98%b6%e6%8a%80%e5%b7%a7)
+    - [5.1 嵌入类](#51-%e5%b5%8c%e5%85%a5%e7%b1%bb)
+    - [5.2 Template-Template Class](#52-template-template-class)
+    - [5.3 高阶函数](#53-%e9%ab%98%e9%98%b6%e5%87%bd%e6%95%b0)
+    - [5.4 闭包：模板的“基于对象”](#54-%e9%97%ad%e5%8c%85%e6%a8%a1%e6%9d%bf%e7%9a%84%e5%9f%ba%e4%ba%8e%e5%af%b9%e8%b1%a1)
+    - [5.5 占位符(placeholder)：在C++中实现方言的基石](#55-%e5%8d%a0%e4%bd%8d%e7%ac%a6placeholder%e5%9c%a8c%e4%b8%ad%e5%ae%9e%e7%8e%b0%e6%96%b9%e8%a8%80%e7%9a%84%e5%9f%ba%e7%9f%b3)
+    - [5.6 编译期“多态”](#56-%e7%bc%96%e8%af%91%e6%9c%9f%e5%a4%9a%e6%80%81)
+  - [6   模板的威力：从foreach, transform到Linq](#6-%e6%a8%a1%e6%9d%bf%e7%9a%84%e5%a8%81%e5%8a%9b%e4%bb%8eforeach-transform%e5%88%b0linq)
+    - [6.1 Foreach与Transform](#61-foreach%e4%b8%8etransform)
+    - [6.2 Boost中的模板](#62-boost%e4%b8%ad%e7%9a%84%e6%a8%a1%e6%9d%bf)
+    - [6.3 Reactor、Linq与C++中的实践](#63-reactorlinq%e4%b8%8ec%e4%b8%ad%e7%9a%84%e5%ae%9e%e8%b7%b5)
+    - [6.4 更高更快更强：从Linq到FP](#64-%e6%9b%b4%e9%ab%98%e6%9b%b4%e5%bf%ab%e6%9b%b4%e5%bc%ba%e4%bb%8elinq%e5%88%b0fp)
+  - [7   结语：讨论有益，争端无用](#7-%e7%bb%93%e8%af%ad%e8%ae%a8%e8%ae%ba%e6%9c%89%e7%9b%8a%e4%ba%89%e7%ab%af%e6%97%a0%e7%94%a8)
+    - [7.1 更好的编译器，更友善的出错信息](#71-%e6%9b%b4%e5%a5%bd%e7%9a%84%e7%bc%96%e8%af%91%e5%99%a8%e6%9b%b4%e5%8f%8b%e5%96%84%e7%9a%84%e5%87%ba%e9%94%99%e4%bf%a1%e6%81%af)
+    - [7.2 模板的症结：易于实现，难于完美](#72-%e6%a8%a1%e6%9d%bf%e7%9a%84%e7%97%87%e7%bb%93%e6%98%93%e4%ba%8e%e5%ae%9e%e7%8e%b0%e9%9a%be%e4%ba%8e%e5%ae%8c%e7%be%8e)
+    - [7.3 一些期望](#73-%e4%b8%80%e4%ba%9b%e6%9c%9f%e6%9c%9b)
 
 ## 0. 前言
 
@@ -2568,6 +2630,8 @@ void foo(
 虽然它写起来并不直观，但是对于既没有编译器自省、也没有Concept的C++11来说，已经是最好的选择了。
 
 （补充例子：构造函数上的enable_if）
+
+## !!! 以下章节未完成 !!!
 
 ## 4 元编程下的数据结构与算法
 ### 4.1 表达式与数值计算
