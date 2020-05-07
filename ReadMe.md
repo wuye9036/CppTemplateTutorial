@@ -2637,7 +2637,7 @@ void foo(
 ## 4 元编程下的数据结构与算法
 ### 4.1 表达式与数值计算
 #### 4.1.1 const与常量表达式
-我们先从大家都熟悉的const开始来介绍常量表达式，总所周知const是用于修饰一个常量的，我们声明一个普通的const 常量就必须给予初始化。
+我们先从大家都熟悉的const开始来介绍常量表达式，总所周知const是用于修饰一个常量的，我们定义一个普通的const 常量就必须给予初始化。
 而所谓的常量表达式，就是定义能在编译时求值的表达式。
 比如：
 
@@ -2685,7 +2685,8 @@ static const 在类中并不支持初始化复杂的类型，但是我们明眼�
 
 #### 4.1.2 constexpr与常量表达式
 从C++11标准起，引入了一个关键字叫做constexpr，顾名思义，就是const expression，就是常量表达式。
-constexpr可以修饰函数，变量等等（不可以修饰函数的参数），对于被声明为constexpr的变量或者函数，则它们在编译期间被求值是**可能的**（也就是也可以不能）
+constexpr可以修饰函数，变量等等（不可以修饰函数的参数），对于被声明为constexpr的函数，则它们在编译期间被求值是**可能的**（也就是也可以不能）
+对于被声明为constexpr的变量，则它们在编译期被求值的必须的。
 现在我们来思考这样一个情景，假设我们用常量表达式定义了一个编译期整数常量`constexpr int bleem  = 34;`据说这是一个非常强大的数，我们定义了这个数，通过一系列很nb轰轰的函数就可以得到另一个更为强大的整数，通过这个整数我们可以爆炸了。好了，我们要定义一个新的数如果仅仅使用手写会很不好看，显然定义成函数调用的形式就非常合适，那么就是`constexpr double boom = add42(div10(bleem))`; 
 
 ```C++
@@ -2728,7 +2729,7 @@ struct Y {
     static constexpr int k; // 错误：constexpr static 要求初始化器
 };
 ```
-有时候我们看着const和constexpr是有点类似的东西，例如上面的X与Y两个类，constexpr可以初始化的对象比const要复杂一点，而编译器还允许我们同时使用constexpr和const，比如`constexpr const N = 999;`，但是在这里constexpr包含了const的语义，在这里我们可以写成`constexpr N = 999` 或者 `const N = 999`，从c++11起，constexpr对于类成员函数也包含了const的语义，即不改变类的成员对象。
+有时候我们看着const和constexpr是有点类似的东西，例如上面的X与Y两个类，constexpr可以初始化的对象比const要复杂一点，而编译器还允许我们同时使用constexpr和const，比如`constexpr const int N = 999;`，但是在这里constexpr包含了const的语义，在这里我们可以写成`constexpr int N = 999` 或者 `const int N = 999`，从c++11起，constexpr对于类成员函数也包含了const的语义，即不改变类的成员对象。
 还要一点需要注意的是，对于constexpr函数，虽然我们显式地写出来告诉编译期这个函数是可以在编译期计算的，但是它也可以不是在编译期运行的函数。比如我们之前所写的函数
 
 ```C++
