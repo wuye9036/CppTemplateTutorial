@@ -442,7 +442,7 @@ int  result = Add(a, b);
 error C2782: 'T _1_2_2::Add(T,T)' : template parameter 'T' is ambiguous
 ```
 
-好吧，"ambigous"，这个提示再明确不过了。
+好吧，"ambiguous"，这个提示再明确不过了。
 
 不过，只要你别逼得编译器精神分裂的话，编译器其实是非常聪明的，它可以从很多的蛛丝马迹中，猜测到你真正的意图，有如下面的例子：
 
