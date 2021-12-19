@@ -1099,6 +1099,7 @@ void PrintID()
 
 template <> class TypeToID<float>
 {
+public:
     static int const ID = 0xF10A7;
 };
 ```
@@ -1108,6 +1109,7 @@ template <> class TypeToID<float>
 ``` C++
 template <> class TypeToID<void*>
 {
+public:
     static int const ID = 0x401d;
 };
 
