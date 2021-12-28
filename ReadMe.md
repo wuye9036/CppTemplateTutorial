@@ -1719,26 +1719,26 @@ template <typename T> void meow()
 struct A;
 template <typename T> struct B;
 template <typename T> struct X {
-    typedef X<T> _A; // 编译器当然知道 X<T> 是一个类型。
-    typedef X    _B; // X 等价于 X<T> 的缩写
-    typedef T    _C; // T 不是一个类型还玩毛
+    typedef X<T> TA; // 编译器当然知道 X<T> 是一个类型。
+    typedef X    TB; // X 等价于 X<T> 的缩写
+    typedef T    TC; // T 不是一个类型还玩毛
     
     // ！！！注意我要变形了！！！
     class Y {
-        typedef X<T>     _D;          // X 的内部，既然外部高枕无忧，内部更不用说了
-        typedef X<T>::Y  _E;          // 嗯，这里也没问题，编译器知道Y就是当前的类型，
+        typedef X<T>     TD;          // X 的内部，既然外部高枕无忧，内部更不用说了
+        typedef X<T>::Y  TE;          // 嗯，这里也没问题，编译器知道Y就是当前的类型，
                                       // 这里在VS2015上会有错，需要添加 typename，
                                       // Clang 上顺利通过。
-        typedef typename X<T*>::Y _F; // 这个居然要加 typename！
+        typedef typename X<T*>::Y TF; // 这个居然要加 typename！
                                       // 因为，X<T*>和X<T>不一样哦，
                                       // 它可能会在实例化的时候被别的偏特化给抢过去实现了。
     };
     
-    typedef A _G;                   // 嗯，没问题，A在外面声明啦
-    typedef B<T> _H;                // B<T>也是一个类型
-    typedef typename B<T>::type _I; // 嗯，因为不知道B<T>::type的信息，
+    typedef A TG;                   // 嗯，没问题，A在外面声明啦
+    typedef B<T> TH;                // B<T>也是一个类型
+    typedef typename B<T>::type TI; // 嗯，因为不知道B<T>::type的信息，
                                     // 所以需要typename
-    typedef B<int>::type _J;        // B<int> 不依赖模板参数，
+    typedef B<int>::type TJ;        // B<int> 不依赖模板参数，
                                     // 所以编译器直接就实例化（instantiate）了
                                     // 但是这个时候，B并没有被实现，所以就出错了
 };
@@ -1752,7 +1752,7 @@ template <typename T> struct X {
 
 2. 在 2.3.3 一节我们插入了C++模板中最难理解的内容之一：名称查找。名称查找是语义分析的一个环节，模板内书写的 **变量声明**、**typedef**、**类型名称** 甚至 **类模板中成员函数的实现** 都要符合名称查找的规矩才不会出错；
 
-3. C++编译器对语义的分析的原则是“大胆假设，小心求证”：在能求证的地方尽量求证 —— 比如两段式名称查找的第一阶段；无法检查的地方假设你是正确的 —— 比如`typedef typename A<T>::MemberType _X;`在模板定义时因为`T`不明确不会轻易判定这个语句的死刑。
+3. C++编译器对语义的分析的原则是“大胆假设，小心求证”：在能求证的地方尽量求证 —— 比如两段式名称查找的第一阶段；无法检查的地方假设你是正确的 —— 比如`typedef typename A<T>::MemberType X;`在模板定义时因为`T`不明确不会轻易判定这个语句的死刑。
 
 从下一章开始，我们将进入元编程环节。我们将使用大量的示例，一方面帮助巩固大家学到的模板知识，一方面也会引导大家使用函数式思维去解决常见的问题。
 
