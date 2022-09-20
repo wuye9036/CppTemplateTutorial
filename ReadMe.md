@@ -2365,7 +2365,9 @@ foo(
     int // 这里都不需要 substitution
 )
 {
-  // 整个实现部分，都没有 substitution。这个很关键。
+  // 根据定义，substitution只发生在函数签名上。
+  // 故而整个函数实现部分都不会存在 substitution。
+  // 这是一个重点需要记住。
 }
 ```
 
@@ -2631,7 +2633,105 @@ void foo(
 
 虽然它写起来并不直观，但是对于既没有编译器自省、也没有Concept的C++11来说，已经是最好的选择了。
 
-（补充例子：构造函数上的enable_if）
+### Concept “概念”
+
+#### “概念” 解决了什么问题
+从上一节可以看出，我们兜兜转转了那么久，就是为了解决两个问题：
+
+1. 在模板进行特化的时候，盘算一下并告诉编译器这里能不能特化；
+
+2. 在函数决议面临多个候选的时候，如果有且仅有其中一个原型能够被函数决议接纳，那就决定是你了！
+
+如果能够直接表达给编译器，不就不用这么麻烦了么。其实在很多现代语言中，都有类似的语言要素存在，比如C#的约束（constraint on type parameters)：
+``` C#
+public class Employee {
+  // ...
+}
+
+public class GenericList<T> where T : Employee {
+  // ...
+}
+```
+上例就非常清晰的呈现了我们对`GenericList`中`T`的要求是：它得是一个`Employee`或`Employee`的子类。
+
+这种“清晰的”类型约束，在C++中称作概念（Concept）。最早有迹可循的概念相关工作应当从2003年后就开始了。2006年Bjarne在POPL 06上的一篇报告“Specifying C++ concepts”算是“近代”Concept工作的首次公开亮相。委员会为Concept筹划数年，在2008年提出了第一版Concepts提案，试图进入C++0x的标准中。这也是Concept第一次在C++社群当中被广泛“炒作”。不过2009年的会议，让“近代”Concept在N2617草案戛然而止。
+
+2013年之后，Concept改头换面为Concept Lite提案（N3701)卷土重来，历经多方博弈和多轮演化，最终形成了我们在C++20里看到的Concept。有关于Concept的方法论和比较，B.S. 在白皮书中有过比较详细的交代。
+
+总之，在concept进入标准之后，模板特化的类型约束写起来就方便与直接多了。而且这些约束之间还可以像表达式一样复用和组合。虽然因为C++类型系统自身的琐碎导致基础库中的concept仍然相当的冗长，但是比起之前起码具备了可用性。
+
+比如我们拿上一节中最后一个例子作为对比：
+``` C++
+// SFINAE
+template <typename ArgT>
+void foo(
+    ArgT&& a, 
+    typename std::enabled_if<
+        std::is_same<std::decay_t<ArgT>, float>::value
+    >::type* = nullptr
+);
+// Concept
+template <typename ArgT>
+  requires std::same_as<std::remove_cvref<T>, float> 
+void foo(ArgT&& a)  {
+}
+```
+可以看到，concept之后的表达式消除了语法噪音，显得更为简洁一些。而对于之前++的例子，concept下则更为扼要：
+```C++
+template <typename T> concept Incrementable = requires (T t) { ++t; }
+template <Incrementable T>
+void inc_counter(T& intTypeCounter) { 
+    ++intTypeCounter;
+}
+```
+直接告诉编译器，我们对T的要求是你得有++。
+
+当然有人会问，那能不能直接写成以下形式，不是更简单吗
+
+``` C++
+template <typename T> requires (T t) { ++t; }
+void inc_counter(T& cnt);
+```
+
+答案是不能。
+因为requires作为keyword是存在二义性的。当它用于模板函数或者模板类的声明时，它是一个constraint，后面需要跟着concept表达式；而用于concept中，则是一个required expression，用于concept的求解。既然constraint后面跟着一个concept表达式，而requires也可以用来定义一个concept expression，那么一个风骚的想法形成了：我能不能用 requires (requires (T t) {++t;}) 来约束模板函数的类型呢？
+
+当然是可以的！C++就是这么的简（~~有~~）单（~~病~~）！
+
+``` C++
+template <typename T> requires (requires (T t) { ++t; })
+void inc_counter(T& cnt);
+```
+
+总而言之，除了这些烦人的问题，“概念”的出现，使得模板的出错提示也清爽了些许 —— 虽然大佬们都在鼓吹concept让模板出错多么好调试，但是实际上模板出错，有一半是来源自类型系统本质上的复杂性，概念并不能解决这一问题。
+
+比如这里使用SFINAE的提示
+```
+<source>:23:5: error: no matching function for call to 'Inc'
+    Inc(y);
+    ^~~
+<source>:5:6: note: candidate template ignored: substitution failure [with T = X]: cannot increment value of type 'X'
+void Inc(T& v, std::decay_t<decltype(++v)>* = nullptr)
+     ^                               ~~
+```
+
+而这里是使用了concept的提示。
+```
+<source>:25:5: error: no matching function for call to 'Inc_Concept'
+    Inc_Concept(y);
+    ^~~~~~~~~~~
+<source>:13:6: note: candidate template ignored: constraints not satisfied [with T = X]
+void Inc_Concept(T& v)
+     ^
+<source>:12:11: note: because 'X' does not satisfy 'Incrementable'
+template <Incrementable T>
+          ^
+<source>:10:41: note: because '++t' would be invalid: cannot increment value of type 'X'
+concept Incrementable = requires(T t) { ++t; };
+```
+
+虽然看起来要更长一点，但是对于复杂类型来说，还是会友善许多。以后会找个例子给大家陈述。
+
 
 ## !!! 以下章节未完成 !!!
 
@@ -2642,6 +2742,8 @@ void foo(
 ### 4.3 字典结构
 ### 4.4 “快速”排序
 ### 4.5 其它常用的“轮子”
+
+## 非模板的编译期计算
 
 ## 5 模板的进阶技巧
 ### 5.1 嵌入类
