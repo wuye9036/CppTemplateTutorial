@@ -2683,7 +2683,7 @@ void inc_counter(T& intTypeCounter) {
     ++intTypeCounter;
 }
 ```
-直接告诉编译器，我们对T的要求是你得有++。
+直接告诉编译器，我们对T的要求是你得有`++`。
 
 当然有人会问，那能不能直接写成以下形式，不是更简单吗
 
@@ -2693,7 +2693,7 @@ void inc_counter(T& cnt);
 ```
 
 答案是不能。
-因为requires作为keyword是存在二义性的。当它用于模板函数或者模板类的声明时，它是一个constraint，后面需要跟着concept表达式；而用于concept中，则是一个required expression，用于concept的求解。既然constraint后面跟着一个concept表达式，而requires也可以用来定义一个concept expression，那么一个风骚的想法形成了：我能不能用 requires (requires (T t) {++t;}) 来约束模板函数的类型呢？
+因为`requires`作为keyword是存在二义性的。当它用于模板函数或者模板类的声明时，它是一个constraint，后面需要跟着concept表达式；而用于concept中，则是一个required expression，用于concept的求解。既然constraint后面跟着一个concept表达式，而requires也可以用来定义一个concept expression，那么一个风骚的想法形成了：我能不能用 `requires (requires (T t) {++t;})` 来约束模板函数的类型呢？
 
 当然是可以的！C++就是这么的简（~~有~~）单（~~病~~）！
 
